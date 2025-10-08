@@ -39,3 +39,5 @@ Investors Arena enables users to create and participate in private leagues where
 - AWS X-Ray (Distributed Tracing)
 
 ## 📁 Project Structure
+
+### Developed by Emaad and Moeez
