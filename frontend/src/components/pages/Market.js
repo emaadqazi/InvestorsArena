@@ -1,8 +1,48 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navigation from '../common/Navigation';
 import '../../styles/navigation.css';
 
 const Market = () => {
+  const [marketStatus, setMarketStatus] = useState({ isOpen: false, currentTime: '' });
+
+  // Check if market is open (9:30 AM - 4:00 PM EST, Monday-Friday)
+  useEffect(() => {
+    const checkMarketStatus = () => {
+      // Get current time in EST
+      const now = new Date();
+      const estTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+      
+      const day = estTime.getDay(); // 0 = Sunday, 6 = Saturday
+      const hours = estTime.getHours();
+      const minutes = estTime.getMinutes();
+      const currentMinutes = hours * 60 + minutes;
+      
+      // Market hours: 9:30 AM (570 minutes) to 4:00 PM (960 minutes)
+      const marketOpen = 9 * 60 + 30; // 9:30 AM in minutes
+      const marketClose = 16 * 60; // 4:00 PM in minutes
+      
+      // Check if it's a weekday (Monday = 1, Friday = 5) and within market hours
+      const isWeekday = day >= 1 && day <= 5;
+      const isDuringMarketHours = currentMinutes >= marketOpen && currentMinutes < marketClose;
+      const isOpen = isWeekday && isDuringMarketHours;
+      
+      // Format current time for display
+      const timeString = estTime.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true 
+      });
+      
+      setMarketStatus({ isOpen, currentTime: timeString });
+    };
+    
+    // Check immediately and then every minute
+    checkMarketStatus();
+    const interval = setInterval(checkMarketStatus, 60000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   // Mock market data for demonstration
   const marketIndices = [
     { name: 'S&P 500', symbol: 'SPX', value: '4,373.20', change: '+0.65%', changeColor: '#27ae60' },
@@ -48,7 +88,9 @@ const Market = () => {
 
           {/* Market Status */}
           <div style={{ 
-            background: 'linear-gradient(135deg, #27ae60, #2ecc71)',
+            background: marketStatus.isOpen 
+              ? 'linear-gradient(135deg, #27ae60, #2ecc71)' 
+              : 'linear-gradient(135deg, #e74c3c, #c0392b)',
             borderRadius: '15px',
             padding: '20px',
             color: 'white',
@@ -58,12 +100,21 @@ const Market = () => {
             justifyContent: 'space-between'
           }}>
             <div>
-              <h3 style={{ fontSize: '18px', marginBottom: '5px' }}>🟢 Market Status</h3>
-              <p style={{ opacity: 0.9, margin: 0 }}>Markets are currently open</p>
+              <h3 style={{ fontSize: '18px', marginBottom: '5px' }}>
+                {marketStatus.isOpen ? '🟢' : '🔴'} Market Status
+              </h3>
+              <p style={{ opacity: 0.9, margin: 0 }}>
+                {marketStatus.isOpen ? 'Markets are currently open' : 'Market is closed'}
+              </p>
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '14px', opacity: 0.9 }}>Eastern Time</div>
-              <div style={{ fontSize: '20px', fontWeight: 'bold' }}>9:30 AM - 4:00 PM</div>
+              <div style={{ fontSize: '20px', fontWeight: 'bold' }}>
+                {marketStatus.currentTime || 'Loading...'}
+              </div>
+              <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '5px' }}>
+                Market Hours: 9:30 AM - 4:00 PM
+              </div>
             </div>
           </div>
 

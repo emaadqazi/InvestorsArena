@@ -5,15 +5,18 @@ import '../../styles/navigation.css';
 const Dashboard = () => {
   // Create letter-by-letter reveal effect
   const createLetterReveal = (text) => {
-    console.log('Creating letter reveal for:', text); // Debug log
     return text.split('').map((char, index) => (
       <span
         key={index}
         className="letter-reveal"
         style={{
-          animationDelay: `${index * 0.15}s`,
+          animationDelay: `${index * 0.08}s`,
           marginRight: char === ' ' ? '0.3em' : '0',
-          display: 'inline-block'
+          display: 'inline-block',
+          background: 'linear-gradient(135deg, #8e44ad, #e91e63, #ff9800)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
         }}
       >
         {char === ' ' ? '\u00A0' : char}
@@ -36,14 +39,9 @@ const Dashboard = () => {
           <h1 style={{ 
             fontSize: '36px', 
             fontWeight: 'bold',
-            color: '#333', 
             marginBottom: '40px',
             textAlign: 'center',
             letterSpacing: '2px',
-            background: 'linear-gradient(135deg, #8e44ad, #e91e63, #ff9800)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
             minHeight: '50px',
             display: 'flex',
             justifyContent: 'center',
