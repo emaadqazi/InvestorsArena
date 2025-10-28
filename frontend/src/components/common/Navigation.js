@@ -74,7 +74,7 @@ const Navigation = () => {
             onClick={toggleProfile}
           >
             <div className="profile-avatar">
-              {initials}
+              
             </div>
             <span>TEST USER</span>
             <span className="dropdown-arrow">▼</span>

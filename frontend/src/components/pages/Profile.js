@@ -23,7 +23,7 @@ const Profile = () => {
             alignItems: 'center',
             gap: '15px'
           }}>
-            👤 My Profile
+            My Profile
           </h1>
           
           <p style={{ color: '#666', fontSize: '18px', marginBottom: '30px' }}>
