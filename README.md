@@ -37,7 +37,3 @@ Investors Arena enables users to create and participate in private leagues where
 - GitHub Actions (CI/CD)
 - AWS CloudWatch (Monitoring)
 - AWS X-Ray (Distributed Tracing)
-
-## 📁 Project Structure
-
-### Developed by Emaad and Moeez
