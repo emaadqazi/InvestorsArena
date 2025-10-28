@@ -1,5 +1,26 @@
 /* Navigation Bar Styles - InvestorsArena */
 
+@keyframes letterReveal {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(5px) scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.letter-reveal {
+  display: inline-block;
+  opacity: 0;
+  animation: letterReveal 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
 .navbar {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -17,7 +38,51 @@
 .navbar-left {
   display: flex;
   align-items: center;
+  flex: 1;
 }
+
+.navbar-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 2;
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+
+.nav-link:hover {
+  background: rgba(142, 68, 173, 0.1);
+  color: #8e44ad;
+  transform: translateY(-2px);
+}
+
+.nav-link.active {
+  background: linear-gradient(135deg, #8e44ad, #e91e63);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(142, 68, 173, 0.3);
+}
+
+/* Navigation link spans removed - using direct text now */
 
 .navbar-logo {
   font-size: 24px;
@@ -38,7 +103,9 @@
 .navbar-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 20px;
+  flex: 1;
 }
 
 .profile-section {
@@ -193,12 +260,23 @@
 @media (max-width: 768px) {
   .navbar {
     padding: 15px 20px;
+    flex-direction: column;
+    gap: 15px;
   }
   
-  .dashboard-headers {
-    padding: 15px 20px;
+  .navbar-left,
+  .navbar-center,
+  .navbar-right {
+    flex: none;
+  }
+  
+  .nav-links {
     gap: 20px;
-    overflow-x: auto;
+  }
+  
+  .nav-link {
+    padding: 10px 15px;
+    font-size: 14px;
   }
   
   .main-content {
@@ -207,5 +285,16 @@
   
   .navbar-logo {
     font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-links {
+    gap: 10px;
+  }
+  
+  .nav-link {
+    padding: 8px 12px;
+    font-size: 12px;
   }
 }

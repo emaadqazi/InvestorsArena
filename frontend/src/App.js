@@ -3,6 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
 import Dashboard from './components/dashboard/Dashboard';
+import Leagues from './components/pages/Leagues';
+import Stocks from './components/pages/Stocks';
+import Market from './components/pages/Market';
+import Profile from './components/pages/Profile';
 import './App.css';
 
 function App() {
@@ -10,15 +14,19 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          {/* Redirect root to login */}
+          {/* Demo authentication flow - redirect to login first */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           
-          {/* Authentication routes */}
+          {/* Mock authentication routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           
-          {/* Protected routes */}
+          {/* Main application pages */}
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/leagues" element={<Leagues />} />
+          <Route path="/stocks" element={<Stocks />} />
+          <Route path="/market" element={<Market />} />
+          <Route path="/profile" element={<Profile />} />
           
           {/* Catch all other routes and redirect to login */}
           <Route path="*" element={<Navigate to="/login" replace />} />

@@ -4,8 +4,8 @@ import '../../styles/auth.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: 'demo@investorsarena.com',
+    password: 'demo123'
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ const Login = () => {
     setError('');
 
     try {
-      // Basic validation
+      // Basic validation for demo
       if (!formData.email || !formData.password) {
         throw new Error('Please fill in all fields');
       }
@@ -35,17 +35,20 @@ const Login = () => {
         throw new Error('Please enter a valid email address');
       }
 
-      // TODO: Implement Firebase authentication here
-      // For now, simulate login process
+      if (formData.password.length < 3) {
+        throw new Error('Password must be at least 3 characters for demo');
+      }
+
+      // Mock authentication - simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Mock successful login - replace with real Firebase auth
-      console.log('Login attempt:', formData);
+      console.log('Demo login successful for:', formData.email);
       
-      // Navigate to dashboard (we'll create this later)
+      // Always succeed and redirect to dashboard
       navigate('/dashboard');
       
     } catch (err) {
+      console.error('Login error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -57,9 +60,9 @@ const Login = () => {
       <div className="auth-card">
         <div className="auth-header">
           <div className="logo">InvestorsArena</div>
-          <h1 className="auth-title">Welcome Back!</h1>
+          <h1 className="auth-title">Demo Login</h1>
           <p className="auth-subtitle">
-            Sign in to continue building your dream portfolio
+            Enter any email and password to access the platform
           </p>
         </div>
 

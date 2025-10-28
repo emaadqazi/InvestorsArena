@@ -8,9 +8,9 @@ const Navigation = () => {
   const location = useLocation();
 
   const handleLogout = () => {
-    // TODO: Clear user session/tokens when Firebase is integrated
-    console.log('Logging out...');
-    navigate('/login');
+    setIsProfileOpen(false); // Close dropdown
+    console.log('Demo logout - redirecting to login');
+    navigate('/login'); // Redirect to login to show complete auth flow
   };
 
   const toggleProfile = () => {
@@ -29,13 +29,9 @@ const Navigation = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isProfileOpen]);
 
-  // Mock user data - replace with real user data from auth context
-  const user = {
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    initials: 'JD'
-  };
+  // Mock user data for Sprint 01 demo
+  const displayName = 'Emaad Qazi';
+  const initials = 'EQ';
 
   return (
     <nav className="navbar">
@@ -44,7 +40,30 @@ const Navigation = () => {
           className="navbar-logo"
           onClick={() => navigate('/dashboard')}
         >
-          InvestorsArena
+          INVESTORS ARENA
+        </div>
+      </div>
+
+      <div className="navbar-center">
+        <div className="nav-links">
+          <div
+            className={`nav-link ${location.pathname === '/leagues' ? 'active' : ''}`}
+            onClick={() => navigate('/leagues')}
+          >
+            LEAGUES
+          </div>
+          <div
+            className={`nav-link ${location.pathname === '/stocks' ? 'active' : ''}`}
+            onClick={() => navigate('/stocks')}
+          >
+            STOCKS
+          </div>
+          <div
+            className={`nav-link ${location.pathname === '/market' ? 'active' : ''}`}
+            onClick={() => navigate('/market')}
+          >
+            MARKET
+          </div>
         </div>
       </div>
 
@@ -55,26 +74,18 @@ const Navigation = () => {
             onClick={toggleProfile}
           >
             <div className="profile-avatar">
-              {user.initials}
+              {initials}
             </div>
-            <span>{user.firstName}</span>
+            <span>TEST USER</span>
             <span className="dropdown-arrow">▼</span>
           </button>
 
           <div className="profile-dropdown">
             <button 
               className="dropdown-item"
-              onClick={() => navigate('/account-settings')}
-            >
-              <span>⚙️</span>
-              <span>Account Settings</span>
-            </button>
-            
-            <button 
-              className="dropdown-item"
               onClick={() => navigate('/profile')}
             >
-              <span>👤</span>
+              <span></span>
               <span>My Profile</span>
             </button>
             
@@ -82,7 +93,7 @@ const Navigation = () => {
               className="dropdown-item logout"
               onClick={handleLogout}
             >
-              <span>🚪</span>
+              <span></span>
               <span>Logout</span>
             </button>
           </div>

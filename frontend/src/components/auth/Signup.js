@@ -11,6 +11,7 @@ const Signup = () => {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -19,8 +20,9 @@ const Signup = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
-    // Clear error when user starts typing
+    // Clear messages when user starts typing
     if (error) setError('');
+    if (success) setSuccess('');
   };
 
   const validateForm = () => {
@@ -45,25 +47,32 @@ const Signup = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
 
     try {
       validateForm();
 
-      // TODO: Implement Firebase authentication here
-      // For now, simulate registration process
+      // Mock registration - simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Mock successful registration - replace with real Firebase auth
-      console.log('Registration attempt:', {
-        ...formData,
-        password: '[HIDDEN]',
-        confirmPassword: '[HIDDEN]'
+      console.log('Demo registration successful for:', formData.email);
+      
+      setSuccess('Account created successfully! Redirecting to login...');
+      
+      // Clear form and redirect to login
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
       });
       
-      // Navigate to login with success message
-      navigate('/login');
+      // Redirect to login after showing success message
+      setTimeout(() => navigate('/login'), 2000);
       
     } catch (err) {
+      console.error('Signup error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -75,15 +84,21 @@ const Signup = () => {
       <div className="auth-card">
         <div className="auth-header">
           <div className="logo">InvestorsArena</div>
-          <h1 className="auth-title">Join the Arena!</h1>
+          <h1 className="auth-title">Demo Registration</h1>
           <p className="auth-subtitle">
-            Create your account and start building your dream portfolio
+            Create a demo account to explore the platform
           </p>
         </div>
 
         {error && (
           <div className="error-message">
             {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="success-message">
+            {success}
           </div>
         )}
 
