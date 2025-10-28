@@ -1,0 +1,176 @@
+/* InvestorsArena Authentication Styles - Matching Fantasy Page Design */
+
+.auth-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e74c3c 0%, #f39c12 25%, #8e44ad 50%, #9b59b6 75%, #3498db 100%);
+  background: linear-gradient(135deg, 
+    rgb(139, 69, 19) 0%,      /* Saddle brown */
+    rgb(160, 82, 45) 15%,     /* Saddle brown lighter */
+    rgb(205, 92, 92) 30%,     /* Indian red */
+    rgb(233, 150, 122) 45%,   /* Dark salmon */
+    rgb(255, 160, 122) 60%,   /* Light salmon */
+    rgb(255, 182, 193) 75%,   /* Light pink */
+    rgb(221, 160, 221) 90%,   /* Plum */
+    rgb(186, 85, 211) 100%    /* Medium orchid */
+  );
+  background: linear-gradient(135deg, #8e44ad 0%, #e91e63 50%, #ff9800 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.auth-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.auth-header {
+  margin-bottom: 30px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #8e44ad, #e91e63);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+
+.auth-title {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.auth-subtitle {
+  color: #666;
+  font-size: 16px;
+  margin-bottom: 0;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  text-align: left;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: #fafafa;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #8e44ad;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(142, 68, 173, 0.1);
+}
+
+.auth-button {
+  background: linear-gradient(135deg, #8e44ad, #e91e63, #ff9800);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.auth-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(142, 68, 173, 0.3);
+}
+
+.auth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.auth-link {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.auth-link p {
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #8e44ad;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 16px;
+}
+
+.link-button:hover {
+  color: #e91e63;
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #fcc;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.success-message {
+  background: #efe;
+  color: #3c3;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #cfc;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .auth-card {
+    margin: 20px;
+    padding: 30px 20px;
+  }
+  
+  .auth-title {
+    font-size: 24px;
+  }
+}
