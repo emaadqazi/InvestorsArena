@@ -1,0 +1,26 @@
+{
+  "name": "investorsarena",
+  "version": "1.0.0",
+  "description": "A gamified investment platform that transforms stock market education into an engaging, competitive experience by combining fantasy sports mechanics with real-time financial data.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emaadqazi/InvestorsArena.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/emaadqazi/InvestorsArena/issues"
+  },
+  "homepage": "https://github.com/emaadqazi/InvestorsArena#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
