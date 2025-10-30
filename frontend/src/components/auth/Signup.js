@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/auth.css';
 
 const Signup = () => {
@@ -14,6 +15,7 @@ const Signup = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -52,14 +54,18 @@ const Signup = () => {
     try {
       validateForm();
 
-      // Mock registration - simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Firebase registration
+      const { user, error } = await signup(formData.email, formData.password);
       
-      console.log('Demo registration successful for:', formData.email);
+      if (error) {
+        throw error;
+      }
       
-      setSuccess('Account created successfully! Redirecting to login...');
+      console.log('Registration successful for:', user.email);
       
-      // Clear form and redirect to login
+      setSuccess('Account created successfully! Redirecting to dashboard...');
+      
+      // Clear form and redirect to dashboard
       setFormData({
         firstName: '',
         lastName: '',
@@ -68,8 +74,8 @@ const Signup = () => {
         confirmPassword: ''
       });
       
-      // Redirect to login after showing success message
-      setTimeout(() => navigate('/login'), 2000);
+      // Redirect to dashboard after showing success message
+      setTimeout(() => navigate('/dashboard'), 2000);
       
     } catch (err) {
       console.error('Signup error:', err);

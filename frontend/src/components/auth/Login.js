@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/auth.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: 'demo@investorsarena.com',
-    password: 'demo123'
+    email: '',
+    password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -26,7 +28,7 @@ const Login = () => {
     setError('');
 
     try {
-      // Basic validation for demo
+      // Basic validation
       if (!formData.email || !formData.password) {
         throw new Error('Please fill in all fields');
       }
@@ -35,16 +37,14 @@ const Login = () => {
         throw new Error('Please enter a valid email address');
       }
 
-      if (formData.password.length < 3) {
-        throw new Error('Password must be at least 3 characters for demo');
+      // Firebase authentication
+      const { user, error } = await login(formData.email, formData.password);
+      
+      if (error) {
+        throw error;
       }
 
-      // Mock authentication - simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      console.log('Demo login successful for:', formData.email);
-      
-      // Always succeed and redirect to dashboard
+      console.log('Login successful for:', user.email);
       navigate('/dashboard');
       
     } catch (err) {
