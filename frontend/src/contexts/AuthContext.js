@@ -6,6 +6,7 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   GoogleAuthProvider,
+  GithubAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
 
@@ -120,6 +121,35 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // GitHub Sign In function
+  const signInWithGitHub = async () => {
+    try {
+      setLoading(true);
+      
+      // Create GitHub provider
+      const provider = new GithubAuthProvider();
+      
+      // Sign in with popup
+      const userCredential = await signInWithPopup(auth, provider);
+      const firebaseUser = userCredential.user;
+      
+      console.log('User signed in with GitHub:', firebaseUser.email);
+      
+      return { 
+        user: firebaseUser, 
+        error: null 
+      };
+    } catch (error) {
+      console.error('GitHub signin error:', error);
+      return { 
+        user: null, 
+        error 
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Sign out function
   const signOut = async () => {
     try {
@@ -181,6 +211,7 @@ export const AuthProvider = ({ children }) => {
     signIn,
     signOut,
     signInWithGoogle,
+    signInWithGitHub,
     getUserDisplayName,
     getUserInitials,
     getUserPhotoURL,

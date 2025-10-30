@@ -163,6 +163,110 @@
   font-size: 14px;
 }
 
+/* OAuth Divider */
+.oauth-divider {
+  text-align: center;
+  margin: 25px 0;
+  position: relative;
+}
+
+.oauth-divider::before,
+.oauth-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 45%;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.oauth-divider::before {
+  left: 0;
+}
+
+.oauth-divider::after {
+  right: 0;
+}
+
+.oauth-divider-text {
+  color: #888;
+  font-size: 14px;
+  background: white;
+  padding: 0 15px;
+  position: relative;
+}
+
+/* OAuth Buttons Container */
+.oauth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+/* Standard OAuth Button */
+.oauth-button {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: white;
+  color: #3c4043;
+  box-sizing: border-box;
+}
+
+.oauth-button:hover {
+  background: #f8f9fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.oauth-button:active {
+  background: #f1f3f4;
+}
+
+.oauth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.oauth-button-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Google Button Specific Styles */
+.oauth-button-google {
+  border-color: #dadce0;
+  background: white;
+}
+
+.oauth-button-google:hover {
+  background: #f8f9fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* GitHub Button Specific Styles */
+.oauth-button-github {
+  border-color: #24292e;
+  background: #24292e;
+  color: white;
+}
+
+.oauth-button-github:hover {
+  background: #2f363d;
+}
+
 /* Responsive Design */
 @media (max-width: 480px) {
   .auth-card {
