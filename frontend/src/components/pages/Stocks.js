@@ -18,7 +18,7 @@ const Stocks = () => {
       
       <div className="main-content">
         <div style={{ 
-          background: 'rgba(255, 255, 255, 0.95)', 
+          background: 'rgba(245, 247, 250, 0.95)', 
           borderRadius: '20px', 
           padding: '40px',
           backdropFilter: 'blur(10px)',
@@ -59,14 +59,17 @@ const Stocks = () => {
               }}
             />
             <button style={{
-              background: 'linear-gradient(135deg, #8e44ad, #e91e63)',
+              background: '#1976d2',
               color: 'white',
               border: 'none',
               padding: '15px 30px',
               borderRadius: '10px',
               cursor: 'pointer',
-              fontWeight: 'bold'
-            }}>
+              fontWeight: 'bold',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => e.target.style.background = 'linear-gradient(135deg, #1565c0, #1976d2, #42a5f5)'}
+            onMouseLeave={(e) => e.target.style.background = '#1976d2'}>
               Search
             </button>
             <select style={{
@@ -74,7 +77,7 @@ const Stocks = () => {
               border: '2px solid #e0e0e0',
               borderRadius: '10px',
               fontSize: '16px',
-              background: 'white'
+              background: '#f5f7fa'
             }}>
               <option>All Sectors</option>
               <option>Technology</option>
@@ -90,10 +93,10 @@ const Stocks = () => {
               Popular Stocks
             </h2>
             
-            <div style={{ background: 'white', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
+            <div style={{ background: '#f5f7fa', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
               {/* Table Header */}
               <div style={{ 
-                background: '#f8f9fa', 
+                background: '#f0f4f8', 
                 padding: '20px', 
                 display: 'grid', 
                 gridTemplateColumns: '1fr 2fr 1fr 1fr 1fr',
@@ -120,7 +123,7 @@ const Stocks = () => {
                     borderBottom: index < mockStocks.length - 1 ? '1px solid #f1f3f4' : 'none',
                     transition: 'background 0.3s ease'
                   }}
-                  onMouseEnter={(e) => e.target.style.background = '#f8f9fa'}
+                  onMouseEnter={(e) => e.target.style.background = '#f0f4f8'}
                   onMouseLeave={(e) => e.target.style.background = 'transparent'}
                 >
                   <div style={{ fontWeight: 'bold', color: '#333' }}>{stock.symbol}</div>
@@ -129,14 +132,17 @@ const Stocks = () => {
                   <div style={{ color: stock.changeColor, fontWeight: 'bold' }}>{stock.change}</div>
                   <div>
                     <button style={{
-                      background: 'linear-gradient(135deg, #8e44ad, #e91e63)',
+                      background: '#1976d2',
                       color: 'white',
                       border: 'none',
                       padding: '8px 16px',
                       borderRadius: '6px',
                       cursor: 'pointer',
-                      fontSize: '14px'
-                    }}>
+                      fontSize: '14px',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => e.target.style.background = 'linear-gradient(135deg, #1565c0, #1976d2, #42a5f5)'}
+                    onMouseLeave={(e) => e.target.style.background = '#1976d2'}>
                       Add to Portfolio
                     </button>
                   </div>
@@ -152,7 +158,7 @@ const Stocks = () => {
             </h2>
             
             <div style={{ 
-              background: '#f8f9fa', 
+              background: '#f0f4f8', 
               borderRadius: '10px', 
               padding: '40px', 
               textAlign: 'center',

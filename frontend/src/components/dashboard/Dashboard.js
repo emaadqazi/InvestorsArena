@@ -13,7 +13,7 @@ const Dashboard = () => {
           animationDelay: `${index * 0.08}s`,
           marginRight: char === ' ' ? '0.3em' : '0',
           display: 'inline-block',
-          background: 'linear-gradient(135deg, #8e44ad, #e91e63, #ff9800)',
+          background: 'linear-gradient(135deg, #0a1929, #1976d2, #42a5f5)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text'
@@ -30,7 +30,7 @@ const Dashboard = () => {
       
       <div className="main-content">
         <div style={{ 
-          background: 'rgba(255, 255, 255, 0.95)', 
+          background: 'rgba(245, 247, 250, 0.95)', 
           borderRadius: '20px', 
           padding: '40px',
           backdropFilter: 'blur(10px)',
@@ -56,7 +56,7 @@ const Dashboard = () => {
             
             {/* Leagues Card */}
             <div style={{ 
-              background: 'linear-gradient(135deg, #8e44ad, #e91e63)', 
+              background: 'linear-gradient(135deg, #0a1929, #1976d2)', 
               borderRadius: '15px', 
               padding: '30px', 
               color: 'white',
@@ -73,7 +73,7 @@ const Dashboard = () => {
 
             {/* Stocks Card */}
             <div style={{ 
-              background: 'linear-gradient(135deg, #e91e63, #ff9800)', 
+              background: 'linear-gradient(135deg, #1976d2, #42a5f5)', 
               borderRadius: '15px', 
               padding: '30px', 
               color: 'white',
@@ -90,7 +90,7 @@ const Dashboard = () => {
 
             {/* Market Card */}
             <div style={{ 
-              background: 'linear-gradient(135deg, #ff9800, #f39c12)', 
+              background: 'linear-gradient(135deg, #42a5f5, #81d4fa)', 
               borderRadius: '15px', 
               padding: '30px', 
               color: 'white',

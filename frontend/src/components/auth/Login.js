@@ -5,8 +5,8 @@ import '../../styles/auth.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: 'testuser@example.com',
+    password: 'Test123'
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,7 +52,7 @@ const Login = () => {
       
       // Provide user-friendly error messages
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
-        setError('Emailr or password does not exist');
+        setError('Email or password does not exist');
       } else {
         setError(err.message);
       }

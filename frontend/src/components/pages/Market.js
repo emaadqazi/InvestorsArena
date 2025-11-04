@@ -65,7 +65,7 @@ const Market = () => {
       
       <div className="main-content">
         <div style={{ 
-          background: 'rgba(255, 255, 255, 0.95)', 
+          background: 'rgba(245, 247, 250, 0.95)', 
           borderRadius: '20px', 
           padding: '40px',
           backdropFilter: 'blur(10px)',
@@ -97,7 +97,9 @@ const Market = () => {
             marginBottom: '30px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between'
+            justifyContent: 'space-between',
+            border: '2px solid rgba(25, 118, 210, 0.3)',
+            boxShadow: '0 4px 15px rgba(25, 118, 210, 0.2), 0 0 0 1px rgba(66, 165, 245, 0.1) inset'
           }}>
             <div>
               <h3 style={{ fontSize: '18px', marginBottom: '5px' }}>
@@ -129,7 +131,7 @@ const Market = () => {
                 <div 
                   key={index.symbol}
                   style={{ 
-                    background: 'white',
+                    background: '#f5f7fa',
                     borderRadius: '15px',
                     padding: '25px',
                     boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
@@ -155,10 +157,10 @@ const Market = () => {
               Top Movers
             </h2>
             
-            <div style={{ background: 'white', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
+            <div style={{ background: '#f5f7fa', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
               {/* Table Header */}
               <div style={{ 
-                background: '#f8f9fa', 
+                background: '#f0f4f8', 
                 padding: '20px', 
                 display: 'grid', 
                 gridTemplateColumns: '1fr 2fr 1fr',
@@ -220,7 +222,7 @@ const Market = () => {
               Market Calendar
             </h2>
             
-            <div style={{ background: 'white', borderRadius: '15px', padding: '25px', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
+            <div style={{ background: '#f5f7fa', borderRadius: '15px', padding: '25px', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
                 <div>
                   <h4 style={{ color: '#333', marginBottom: '10px' }}>Today</h4>

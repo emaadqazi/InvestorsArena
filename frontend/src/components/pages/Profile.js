@@ -9,7 +9,7 @@ const Profile = () => {
       
       <div className="main-content">
         <div style={{ 
-          background: 'rgba(255, 255, 255, 0.95)', 
+          background: 'rgba(245, 247, 250, 0.95)', 
           borderRadius: '20px', 
           padding: '40px',
           backdropFilter: 'blur(10px)',
@@ -31,7 +31,7 @@ const Profile = () => {
           </p>
 
           <div style={{ 
-            background: '#f8f9fa', 
+              background: '#f0f4f8',
             borderRadius: '10px', 
             padding: '40px', 
             textAlign: 'center',

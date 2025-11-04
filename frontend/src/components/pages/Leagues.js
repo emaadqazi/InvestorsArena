@@ -9,7 +9,7 @@ const Leagues = () => {
       
       <div className="main-content">
         <div style={{ 
-          background: 'rgba(255, 255, 255, 0.95)', 
+          background: 'rgba(245, 247, 250, 0.95)', 
           borderRadius: '20px', 
           padding: '40px',
           backdropFilter: 'blur(10px)',
@@ -34,7 +34,7 @@ const Leagues = () => {
             
             {/* Create League Card */}
             <div style={{ 
-              background: 'linear-gradient(135deg, #8e44ad, #e91e63)', 
+              background: 'linear-gradient(135deg, #0a1929, #1976d2)', 
               borderRadius: '15px', 
               padding: '30px', 
               color: 'white',
@@ -57,7 +57,7 @@ const Leagues = () => {
 
             {/* Join League Card */}
             <div style={{ 
-              background: 'linear-gradient(135deg, #e91e63, #ff9800)', 
+              background: 'linear-gradient(135deg, #1976d2, #42a5f5)', 
               borderRadius: '15px', 
               padding: '30px', 
               color: 'white',
@@ -86,7 +86,7 @@ const Leagues = () => {
             </h2>
             
             <div style={{ 
-              background: '#f8f9fa', 
+              background: '#f0f4f8', 
               borderRadius: '10px', 
               padding: '40px', 
               textAlign: 'center',

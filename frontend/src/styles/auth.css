@@ -13,7 +13,7 @@
     rgb(221, 160, 221) 90%,   /* Plum */
     rgb(186, 85, 211) 100%    /* Medium orchid */
   );
-  background: linear-gradient(135deg, #8e44ad 0%, #e91e63 50%, #ff9800 100%);
+  background: linear-gradient(135deg, #0a1929 0%, #1976d2 50%, #42a5f5 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,7 +21,7 @@
 }
 
 .auth-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(245, 247, 250, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 40px;
@@ -29,7 +29,7 @@
   width: 100%;
   max-width: 400px;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(240, 244, 248, 0.3);
 }
 
 .auth-header {
@@ -39,7 +39,7 @@
 .logo {
   font-size: 24px;
   font-weight: bold;
-  background: linear-gradient(135deg, #8e44ad, #e91e63);
+  background: linear-gradient(135deg, #0a1929, #1976d2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -83,19 +83,19 @@
   border-radius: 10px;
   font-size: 16px;
   transition: all 0.3s ease;
-  background: #fafafa;
+  background: #f0f4f8;
   box-sizing: border-box;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #8e44ad;
-  background: #fff;
-  box-shadow: 0 0 10px rgba(142, 68, 173, 0.1);
+  border-color: #1976d2;
+  background: #f5f7fa;
+  box-shadow: 0 0 10px rgba(25, 118, 210, 0.1);
 }
 
 .auth-button {
-  background: linear-gradient(135deg, #8e44ad, #e91e63, #ff9800);
+  background: #1976d2;
   color: white;
   border: none;
   padding: 16px 32px;
@@ -108,8 +108,9 @@
 }
 
 .auth-button:hover {
+  background: linear-gradient(135deg, #1565c0, #1976d2, #42a5f5);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(142, 68, 173, 0.3);
+  box-shadow: 0 8px 20px rgba(25, 118, 210, 0.3);
 }
 
 .auth-button:disabled {
@@ -132,7 +133,7 @@
 .link-button {
   background: none;
   border: none;
-  color: #8e44ad;
+  color: #1976d2;
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
@@ -140,7 +141,7 @@
 }
 
 .link-button:hover {
-  color: #e91e63;
+  color: #42a5f5;
 }
 
 .error-message {
@@ -191,7 +192,7 @@
 .oauth-divider-text {
   color: #888;
   font-size: 14px;
-  background: white;
+  background: #f5f7fa;
   padding: 0 15px;
   position: relative;
 }
@@ -218,18 +219,18 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  background: white;
+  background: #f5f7fa;
   color: #3c4043;
   box-sizing: border-box;
 }
 
 .oauth-button:hover {
-  background: #f8f9fa;
+  background: #f0f4f8;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .oauth-button:active {
-  background: #f1f3f4;
+  background: #e8edf3;
 }
 
 .oauth-button:disabled {
@@ -248,11 +249,11 @@
 /* Google Button Specific Styles */
 .oauth-button-google {
   border-color: #dadce0;
-  background: white;
+  background: #f5f7fa;
 }
 
 .oauth-button-google:hover {
-  background: #f8f9fa;
+  background: #f0f4f8;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
