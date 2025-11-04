@@ -9,24 +9,28 @@ const Leagues = () => {
       
       <div className="main-content">
         <div style={{ 
-          background: 'rgba(245, 247, 250, 0.95)', 
-          borderRadius: '20px', 
-          padding: '40px',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)'
+          background: 'linear-gradient(135deg, rgba(30, 40, 55, 0.9) 0%, rgba(25, 45, 70, 0.85) 100%)', 
+          borderRadius: '24px', 
+          padding: '50px',
+          backdropFilter: 'blur(20px)',
+          boxShadow: '0 25px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(25, 118, 210, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          border: '1px solid rgba(25, 118, 210, 0.3)'
         }}>
           <h1 style={{ 
-            fontSize: '32px', 
-            color: '#333', 
+            fontSize: '38px', 
+            color: '#e3f2fd',
+            fontWeight: '800',
             marginBottom: '20px',
             display: 'flex',
             alignItems: 'center',
-            gap: '15px'
+            gap: '15px',
+            letterSpacing: '2px',
+            textShadow: '0 2px 10px rgba(25, 118, 210, 0.3)'
           }}>
             LEAGUES
           </h1>
           
-          <p style={{ color: '#666', fontSize: '18px', marginBottom: '30px' }}>
+          <p style={{ color: '#b3d9ff', fontSize: '18px', marginBottom: '30px', opacity: 0.9 }}>
             Create and join investment leagues to compete with friends and other investors.
           </p>
 
@@ -86,7 +90,7 @@ const Leagues = () => {
             </h2>
             
             <div style={{ 
-              background: '#f0f4f8', 
+              background: '#90caf9', 
               borderRadius: '10px', 
               padding: '40px', 
               textAlign: 'center',
