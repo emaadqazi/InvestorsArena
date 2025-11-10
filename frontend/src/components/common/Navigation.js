@@ -29,9 +29,6 @@ const Navigation = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isProfileOpen]);
 
-  // Mock user data for Sprint 01 demo
-  const displayName = 'Emaad Qazi';
-  const initials = 'EQ';
 
   return (
     <nav className="navbar">
