@@ -1,0 +1,130 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  firstName     String
+  lastName      String
+  emailVerified Boolean   @default(false)
+  emailToken    String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  adminLeagues      League[]        @relation("LeagueAdmin")
+  leagueMemberships LeagueMember[]
+  portfolios        Portfolio[]
+  transactions      Transaction[]
+  
+  @@map("users")
+}
+
+model League {
+  id              String    @id @default(uuid())
+  name            String
+  description     String?
+  invitationCode  String    @unique
+  virtualBudget   Float     @default(100000) // Default $100,000
+  adminId         String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  admin           User      @relation("LeagueAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+  members         LeagueMember[]
+  portfolios      Portfolio[]
+  transactions    Transaction[]
+  
+  @@map("leagues")
+}
+
+model LeagueMember {
+  id        String   @id @default(uuid())
+  userId    String
+  leagueId  String
+  joinedAt  DateTime @default(now())
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  league    League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, leagueId])
+  @@map("league_members")
+}
+
+model Portfolio {
+  id            String    @id @default(uuid())
+  userId        String
+  leagueId      String
+  cashBalance   Float     @default(0)
+  totalValue    Float     @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  league        League    @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  holdings      Holding[]
+  transactions  Transaction[]
+  
+  @@unique([userId, leagueId])
+  @@map("portfolios")
+}
+
+model Holding {
+  id            String    @id @default(uuid())
+  portfolioId   String
+  symbol        String
+  quantity      Int
+  averagePrice  Float
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  portfolio     Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  
+  @@unique([portfolioId, symbol])
+  @@map("holdings")
+}
+
+model Transaction {
+  id            String      @id @default(uuid())
+  userId        String
+  leagueId      String
+  portfolioId   String
+  symbol        String
+  type          String      // "BUY" or "SELL"
+  quantity      Int
+  price         Float
+  totalAmount   Float
+  timestamp     DateTime    @default(now())
+  
+  // Relations
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  league        League      @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  portfolio     Portfolio   @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  
+  @@map("transactions")
+}
+
+model Stock {
+  id          String    @id @default(uuid())
+  symbol      String    @unique
+  name        String
+  price       Float
+  lastUpdated DateTime  @default(now())
+  
+  @@map("stocks")
+}
+
