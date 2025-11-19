@@ -11,6 +11,7 @@ import {
 } from 'firebase/auth';
 
 import { auth } from '../firebase/config';
+import { userService } from '../services/supabase';
 
 const AuthContext = createContext({});
 
@@ -43,23 +44,36 @@ export const AuthProvider = ({ children }) => {
   const signUp = async (email, password, userData = {}) => {
     try {
       setLoading(true);
-      
+
       // Create user in Firebase
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
-      
+
       console.log('User signed up successfully:', firebaseUser.email);
-      
+
+      // Create user profile in Supabase database
+      const { error: dbError } = await userService.createUserProfile(
+        firebaseUser.uid,
+        firebaseUser.email,
+        userData
+      );
+
+      if (dbError) {
+        console.error('Failed to create user profile in database:', dbError);
+        // Note: We don't fail the signup if database creation fails
+        // The user is still authenticated in Firebase
+      }
+
       // Return user data in consistent format
-      return { 
-        user: firebaseUser, 
-        error: null 
+      return {
+        user: firebaseUser,
+        error: null
       };
     } catch (error) {
       console.error('Signup error:', error);
-      return { 
-        user: null, 
-        error 
+      return {
+        user: null,
+        error
       };
     } finally {
       setLoading(false);
@@ -96,25 +110,44 @@ export const AuthProvider = ({ children }) => {
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      
+
       // Create Google provider
       const provider = new GoogleAuthProvider();
-      
+
       // Sign in with popup
       const userCredential = await signInWithPopup(auth, provider);
       const firebaseUser = userCredential.user;
-      
+
       console.log('User signed in with Google:', firebaseUser.email);
-      
-      return { 
-        user: firebaseUser, 
-        error: null 
+
+      // Check if user profile exists in database
+      const { data: existingProfile } = await userService.getUserProfile(firebaseUser.uid);
+
+      // Create profile only if it doesn't exist (new user)
+      if (!existingProfile) {
+        const { error: dbError } = await userService.createUserProfile(
+          firebaseUser.uid,
+          firebaseUser.email,
+          {
+            firstName: firebaseUser.displayName?.split(' ')[0] || null,
+            lastName: firebaseUser.displayName?.split(' ').slice(1).join(' ') || null
+          }
+        );
+
+        if (dbError) {
+          console.error('Failed to create user profile in database:', dbError);
+        }
+      }
+
+      return {
+        user: firebaseUser,
+        error: null
       };
     } catch (error) {
       console.error('Google signin error:', error);
-      return { 
-        user: null, 
-        error 
+      return {
+        user: null,
+        error
       };
     } finally {
       setLoading(false);
@@ -125,25 +158,44 @@ export const AuthProvider = ({ children }) => {
   const signInWithGitHub = async () => {
     try {
       setLoading(true);
-      
+
       // Create GitHub provider
       const provider = new GithubAuthProvider();
-      
+
       // Sign in with popup
       const userCredential = await signInWithPopup(auth, provider);
       const firebaseUser = userCredential.user;
-      
+
       console.log('User signed in with GitHub:', firebaseUser.email);
-      
-      return { 
-        user: firebaseUser, 
-        error: null 
+
+      // Check if user profile exists in database
+      const { data: existingProfile } = await userService.getUserProfile(firebaseUser.uid);
+
+      // Create profile only if it doesn't exist (new user)
+      if (!existingProfile) {
+        const { error: dbError } = await userService.createUserProfile(
+          firebaseUser.uid,
+          firebaseUser.email,
+          {
+            firstName: firebaseUser.displayName?.split(' ')[0] || null,
+            lastName: firebaseUser.displayName?.split(' ').slice(1).join(' ') || null
+          }
+        );
+
+        if (dbError) {
+          console.error('Failed to create user profile in database:', dbError);
+        }
+      }
+
+      return {
+        user: firebaseUser,
+        error: null
       };
     } catch (error) {
       console.error('GitHub signin error:', error);
-      return { 
-        user: null, 
-        error 
+      return {
+        user: null,
+        error
       };
     } finally {
       setLoading(false);

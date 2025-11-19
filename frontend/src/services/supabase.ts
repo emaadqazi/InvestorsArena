@@ -1,8 +1,8 @@
 // Supabase Database Configuration
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.REACT_APP_SUPABASE_PROJECT_URL
-const supabaseKey = process.env.REACT_APP_SUPABASE_API_KEY
+const supabaseUrl = process.env.REACT_APP_SUPABASE_PROJECT_URL || ''
+const supabaseKey = process.env.REACT_APP_SUPABASE_API_KEY || ''
 
 // Debug environment variables
 console.log('🔍 Checking Supabase environment variables:')
@@ -25,22 +25,12 @@ if (!hasEnvVars) {
 }
 
 // Create Supabase client for database operations
-export const supabase = hasEnvVars 
-  ? createClient(supabaseUrl, supabaseKey)
-  : {
-      // Mock client for development without env vars
-      from: () => ({
-        select: () => Promise.resolve({ data: null, error: { message: 'Please configure Supabase environment variables' } }),
-        insert: () => Promise.resolve({ data: null, error: { message: 'Please configure Supabase environment variables' } }),
-        update: () => Promise.resolve({ data: null, error: { message: 'Please configure Supabase environment variables' } }),
-        delete: () => Promise.resolve({ data: null, error: { message: 'Please configure Supabase environment variables' } })
-      })
-    }
+export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey)
 
 // Database helper functions for user operations
 export const userService = {
   // Create user profile in Supabase after Firebase signup
-  async createUserProfile(firebaseUid, email, userData = {}) {
+  async createUserProfile(firebaseUid: string, email: string, userData: any = {}) {
     if (!hasEnvVars) {
       return { data: null, error: { message: 'Please configure Supabase environment variables' } }
     }
@@ -72,7 +62,7 @@ export const userService = {
   },
 
   // Get user profile by Firebase UID
-  async getUserProfile(firebaseUid) {
+  async getUserProfile(firebaseUid: string) {
     if (!hasEnvVars) {
       return { data: null, error: { message: 'Please configure Supabase environment variables' } }
     }
@@ -97,7 +87,7 @@ export const userService = {
   },
 
   // Update user profile
-  async updateUserProfile(firebaseUid, updates) {
+  async updateUserProfile(firebaseUid: string, updates: any) {
     if (!hasEnvVars) {
       return { data: null, error: { message: 'Please configure Supabase environment variables' } }
     }
