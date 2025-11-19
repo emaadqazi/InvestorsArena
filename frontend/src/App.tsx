@@ -3,6 +3,7 @@ import { HomeNew } from "./pages/HomeNew";
 import Login from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
 import { AuthProvider } from "./contexts/AuthContext";
+import { Dashboard } from "./pages/Dashboard";
 import { FantasyNew } from "./pages/FantasyNew";
 import { LeagueNew } from "./pages/LeagueNew";
 import { CreateTeam } from "./pages/CreateTeam";
@@ -14,7 +15,6 @@ import { ChallengesNew } from "./pages/ChallengesNew";
 import { MarketNew } from "./pages/MarketNew";
 import { BlogNew } from "./pages/BlogNew";
 import { NewsNew } from "./pages/NewsNew";
-import './App.css';
 
 export default function App() {
   return (
@@ -25,6 +25,7 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Login />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/fantasy" element={<FantasyNew />} />
           <Route path="/league" element={<LeagueNew />} />
           <Route path="/create-team" element={<CreateTeam />} />

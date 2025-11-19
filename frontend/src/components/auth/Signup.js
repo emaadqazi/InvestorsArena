@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { UserPlus, Chrome, Github } from 'lucide-react';
 import '../../styles/auth.css';
 
 const Signup = () => {
@@ -152,7 +153,12 @@ const Signup = () => {
             className="auth-button"
             disabled={loading}
           >
-            {loading ? 'Creating account...' : 'Sign Up'}
+            {loading ? 'Creating account...' : (
+              <>
+                Sign Up
+                <UserPlus className="ml-2" size={20} />
+              </>
+            )}
           </button>
         </form>
 
@@ -167,7 +173,7 @@ const Signup = () => {
             onClick={handleGoogleSignIn}
             disabled={loading}
           >
-            <span className="oauth-button-icon">🔵</span>
+            <Chrome className="oauth-button-icon" size={20} />
             Sign up with Google
           </button>
 
@@ -177,7 +183,7 @@ const Signup = () => {
             onClick={handleGitHubSignIn}
             disabled={loading}
           >
-            <span className="oauth-button-icon">⚫</span>
+            <Github className="oauth-button-icon" size={20} />
             Sign up with GitHub
           </button>
         </div>

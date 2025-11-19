@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { LogIn, Chrome, Github } from 'lucide-react';
 import '../../styles/auth.css';
 
 const Login = () => {
@@ -123,7 +124,12 @@ const Login = () => {
             className="auth-button"
             disabled={loading}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Signing in...' : (
+              <>
+                Sign In
+                <LogIn className="ml-2" size={20} />
+              </>
+            )}
           </button>
         </form>
 
@@ -138,7 +144,7 @@ const Login = () => {
             onClick={handleGoogleSignIn}
             disabled={loading}
           >
-            <span className="oauth-button-icon">🔵</span>
+            <Chrome className="oauth-button-icon" size={20} />
             Sign in with Google
           </button>
 
@@ -148,7 +154,7 @@ const Login = () => {
             onClick={handleGitHubSignIn}
             disabled={loading}
           >
-            <span className="oauth-button-icon">⚫</span>
+            <Github className="oauth-button-icon" size={20} />
             Sign in with GitHub
           </button>
         </div>

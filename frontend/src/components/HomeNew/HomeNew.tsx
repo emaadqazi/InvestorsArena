@@ -188,10 +188,6 @@ export function HomeNew() {
               <p className="text-gray-600 text-sm leading-relaxed">
                 Create private leagues with friends or join public competitions. Customize rules and compete throughout the season.
               </p>
-              <Link to="/league" className="inline-flex items-center gap-1 text-emerald-700 text-sm mt-4 hover:gap-2 transition-all">
-                View Leagues
-                <ArrowRight className="h-4 w-4" />
-              </Link>
             </Card>
 
             {/* Challenges */}
@@ -203,10 +199,6 @@ export function HomeNew() {
               <p className="text-gray-600 text-sm leading-relaxed">
                 Complete weekly challenges to earn bonus points. Test your skills with specific stock picking scenarios.
               </p>
-              <Link to="/challenges" className="inline-flex items-center gap-1 text-purple-700 text-sm mt-4 hover:gap-2 transition-all">
-                View Challenges{" "}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
             </Card>
 
             {/* Leaderboards */}
@@ -218,10 +210,6 @@ export function HomeNew() {
               <p className="text-gray-600 text-sm leading-relaxed">
                 Track your rank globally and within your leagues. See how you stack up against top performers worldwide.
               </p>
-              <Link to="/fantasy" className="inline-flex items-center gap-1 text-indigo-700 text-sm mt-4 hover:gap-2 transition-all">
-                View Rankings
-                <ArrowRight className="h-4 w-4" />
-              </Link>
             </Card>
           </div>
 
