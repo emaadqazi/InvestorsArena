@@ -1,79 +1,84 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/auth.css';
 
 const Signup = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const { signUp, signInWithGoogle, signInWithGitHub } = useAuth();
   const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-    // Clear messages when user starts typing
-    if (error) setError('');
-    if (success) setSuccess('');
-  };
-
-  const validateForm = () => {
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword) {
-      throw new Error('Please fill in all fields');
-    }
-
-    if (!formData.email.includes('@')) {
-      throw new Error('Please enter a valid email address');
-    }
-
-    if (formData.password.length < 6) {
-      throw new Error('Password must be at least 6 characters long');
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      throw new Error('Passwords do not match');
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
-    setSuccess('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    setLoading(true);
 
     try {
-      validateForm();
-
-      // Mock registration - simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const { user, error: signUpError } = await signUp(email, password);
       
-      console.log('Demo registration successful for:', formData.email);
-      
-      setSuccess('Account created successfully! Redirecting to login...');
-      
-      // Clear form and redirect to login
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-      });
-      
-      // Redirect to login after showing success message
-      setTimeout(() => navigate('/login'), 2000);
-      
+      if (signUpError) {
+        setError(signUpError.message || 'Failed to create account');
+      } else if (user) {
+        navigate('/dashboard');
+      }
     } catch (err) {
+      setError('An unexpected error occurred');
       console.error('Signup error:', err);
-      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setLoading(true);
+
+    try {
+      const { user, error: signInError } = await signInWithGoogle();
+      
+      if (signInError) {
+        setError(signInError.message || 'Failed to sign in with Google');
+      } else if (user) {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error('Google sign in error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGitHubSignIn = async () => {
+    setError('');
+    setLoading(true);
+
+    try {
+      const { user, error: signInError } = await signInWithGitHub();
+      
+      if (signInError) {
+        setError(signInError.message || 'Failed to sign in with GitHub');
+      } else if (user) {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error('GitHub sign in error:', err);
     } finally {
       setLoading(false);
     }
@@ -83,11 +88,9 @@ const Signup = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="logo">InvestorsArena</div>
-          <h1 className="auth-title">Demo Registration</h1>
-          <p className="auth-subtitle">
-            Create a demo account to explore the platform
-          </p>
+          <div className="logo">INVESTORS ARENA</div>
+          <h1 className="auth-title">Create Account</h1>
+          <p className="auth-subtitle">Sign up to start investing</p>
         </div>
 
         {error && (
@@ -96,60 +99,19 @@ const Signup = () => {
           </div>
         )}
 
-        {success && (
-          <div className="success-message">
-            {success}
-          </div>
-        )}
-
         <form className="auth-form" onSubmit={handleSubmit}>
-          <div style={{ display: 'flex', gap: '15px' }}>
-            <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label" htmlFor="firstName">
-                First Name
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                className="form-input"
-                placeholder="First name"
-                value={formData.firstName}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </div>
-
-            <div className="form-group" style={{ flex: 1 }}>
-              <label className="form-label" htmlFor="lastName">
-                Last Name
-              </label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                className="form-input"
-                placeholder="Last name"
-                value={formData.lastName}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </div>
-          </div>
-
           <div className="form-group">
             <label className="form-label" htmlFor="email">
-              Email Address
+              Email
             </label>
             <input
-              type="email"
               id="email"
-              name="email"
+              type="email"
               className="form-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
               placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={loading}
             />
           </div>
 
@@ -158,14 +120,14 @@ const Signup = () => {
               Password
             </label>
             <input
-              type="password"
               id="password"
-              name="password"
+              type="password"
               className="form-input"
-              placeholder="Create a password (min 6 characters)"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={loading}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Create a password (min. 6 characters)"
+              minLength={6}
             />
           </div>
 
@@ -174,34 +136,57 @@ const Signup = () => {
               Confirm Password
             </label>
             <input
-              type="password"
               id="confirmPassword"
-              name="confirmPassword"
+              type="password"
               className="form-input"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
               placeholder="Confirm your password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              disabled={loading}
+              minLength={6}
             />
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="auth-button"
             disabled={loading}
           >
-            {loading ? 'Creating Account...' : 'Create Account'}
+            {loading ? 'Creating account...' : 'Sign Up'}
           </button>
         </form>
 
+        <div className="oauth-divider">
+          <span className="oauth-divider-text">OR</span>
+        </div>
+
+        <div className="oauth-buttons">
+          <button
+            type="button"
+            className="oauth-button oauth-button-google"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+          >
+            <span className="oauth-button-icon">🔵</span>
+            Sign up with Google
+          </button>
+
+          <button
+            type="button"
+            className="oauth-button oauth-button-github"
+            onClick={handleGitHubSignIn}
+            disabled={loading}
+          >
+            <span className="oauth-button-icon">⚫</span>
+            Sign up with GitHub
+          </button>
+        </div>
+
         <div className="auth-link">
           <p>Already have an account?</p>
-          <button 
-            className="link-button"
-            onClick={() => navigate('/login')}
-          >
+          <Link to="/login" className="link-button">
             Sign in here
-          </button>
+          </Link>
         </div>
       </div>
     </div>
@@ -209,3 +194,4 @@ const Signup = () => {
 };
 
 export default Signup;
+

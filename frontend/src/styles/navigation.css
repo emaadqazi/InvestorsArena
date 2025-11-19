@@ -25,14 +25,14 @@
 }
 
 .navbar {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 15px 30px;
+  background: rgba(26, 38, 56, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(100, 181, 246, 0.08);
+  padding: 20px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -61,46 +61,48 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 20px;
-  border-radius: 8px;
+  padding: 10px 18px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: bold;
-  font-size: 16px;
-  color: #333;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  font-weight: 500;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
-  letter-spacing: 0.5px;
+  letter-spacing: '-0.2px';
 }
 
 .nav-link:hover {
-  background: rgba(142, 68, 173, 0.1);
-  color: #8e44ad;
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .nav-link.active {
-  background: linear-gradient(135deg, #8e44ad, #e91e63);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(142, 68, 173, 0.3);
+  background: rgba(25, 118, 210, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(100, 181, 246, 0.2);
+}
+
+.nav-link.active:hover {
+  background: rgba(25, 118, 210, 0.2);
 }
 
 /* Navigation link spans removed - using direct text now */
 
 .navbar-logo {
-  font-size: 24px;
-  font-weight: bold;
-  background: linear-gradient(135deg, #8e44ad, #e91e63, #ff9800);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 20px;
+  font-weight: 600;
+  color: #ffffff;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.3s ease;
+  letter-spacing: '-0.3px';
 }
 
 .navbar-logo:hover {
-  transform: scale(1.05);
+  color: #64b5f6;
+  transform: translateX(2px);
 }
 
 .navbar-right {
@@ -119,11 +121,11 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: linear-gradient(135deg, #8e44ad, #e91e63, #ff9800);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 12px;
   cursor: pointer;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -131,8 +133,8 @@
 }
 
 .profile-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(142, 68, 173, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .profile-avatar {
@@ -160,9 +162,11 @@
   top: 100%;
   right: 0;
   margin-top: 10px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, rgba(30, 40, 55, 0.98) 0%, rgba(25, 45, 70, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(25, 118, 210, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(25, 118, 210, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   min-width: 200px;
   opacity: 0;
   visibility: hidden;
@@ -182,7 +186,7 @@
   align-items: center;
   gap: 12px;
   padding: 15px 20px;
-  color: #333;
+  color: #e3f2fd;
   text-decoration: none;
   transition: all 0.3s ease;
   border: none;
@@ -191,20 +195,21 @@
   text-align: left;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .dropdown-item:first-child {
-  border-radius: 10px 10px 0 0;
+  border-radius: 12px 12px 0 0;
 }
 
 .dropdown-item:last-child {
-  border-radius: 0 0 10px 10px;
-  border-top: 1px solid #f0f0f0;
+  border-radius: 0 0 12px 12px;
+  border-top: 1px solid rgba(25, 118, 210, 0.2);
 }
 
 .dropdown-item:hover {
-  background: #f8f9fa;
-  color: #8e44ad;
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.25) 0%, rgba(25, 118, 210, 0.2) 100%);
+  color: #64b5f6;
 }
 
 .dropdown-item.logout {
@@ -212,14 +217,15 @@
 }
 
 .dropdown-item.logout:hover {
-  background: #fee;
-  color: #c0392b;
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.2) 0%, rgba(211, 47, 47, 0.15) 100%);
+  color: #ef5350;
 }
 
 /* Dashboard Layout */
 .dashboard-layout {
   min-height: 100vh;
-  background: linear-gradient(135deg, #8e44ad 0%, #e91e63 50%, #ff9800 100%);
+  background: #1a2332;
+  background-image: linear-gradient(135deg, rgba(26, 35, 50, 0.98) 0%, rgba(25, 118, 210, 0.08) 50%, rgba(66, 165, 245, 0.05) 100%);
 }
 
 .dashboard-content {
@@ -227,32 +233,38 @@
 }
 
 .dashboard-headers {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(30, 40, 55, 0.95) 0%, rgba(25, 45, 70, 0.9) 100%);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(25, 118, 210, 0.3);
   padding: 20px 30px;
   display: flex;
   gap: 40px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .dashboard-header {
-  color: #333;
+  color: #e3f2fd;
   font-size: 18px;
   font-weight: 600;
   text-decoration: none;
   padding: 10px 20px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  border-radius: 10px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
 .dashboard-header:hover,
 .dashboard-header.active {
-  background: linear-gradient(135deg, #8e44ad, #e91e63, #ff9800);
-  color: white;
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.3) 0%, rgba(25, 118, 210, 0.25) 100%);
+  color: #64b5f6;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(142, 68, 173, 0.3);
+  box-shadow: 0 5px 15px rgba(25, 118, 210, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(25, 118, 210, 0.4);
+}
+
+.dashboard-header.active:hover {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.4) 0%, rgba(25, 118, 210, 0.35) 100%);
+  box-shadow: 0 6px 20px rgba(25, 118, 210, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .main-content {

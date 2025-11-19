@@ -1,201 +1,229 @@
-// Authentication Context for InvestorsArena
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import { authService } from '../services/supabase'
+// Firebase Authentication Context for InvestorsArena
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  signInWithPopup
+} from 'firebase/auth';
 
-const AuthContext = createContext({})
+import { auth } from '../firebase/config';
+
+const AuthContext = createContext({});
 
 export const useAuth = () => {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
+    throw new Error('useAuth must be used within an AuthProvider');
   }
-  return context
-}
+  return context;
+};
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null)
-  const [session, setSession] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  // Listen for authentication state changes
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      try {
-        const { session, error } = await authService.getSession()
-        if (error) {
-          console.error('Error getting session:', error)
-        } else {
-          setSession(session)
-          setUser(session?.user ?? null)
-        }
-      } catch (error) {
-        console.error('Error in getInitialSession:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
+    // Set up Firebase auth state listener
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      console.log('Firebase auth state changed:', firebaseUser?.email || 'signed out');
+      setUser(firebaseUser);
+      setLoading(false);
+    });
 
-    getInitialSession()
+    // Cleanup subscription on unmount
+    return unsubscribe;
+  }, []);
 
-    // Listen for auth state changes
-    const { data: { subscription } } = authService.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session?.user?.email)
-      
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    return () => {
-      subscription?.unsubscribe()
-    }
-  }, [])
-
-  // Sign up function
+  // Sign up function - creates Firebase user
   const signUp = async (email, password, userData = {}) => {
     try {
-      setLoading(true)
-      const { data, error } = await authService.signUp(email, password, {
-        full_name: userData.fullName,
-        first_name: userData.firstName,
-        last_name: userData.lastName
-      })
+      setLoading(true);
       
-      if (error) {
-        throw error
-      }
+      // Create user in Firebase
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
       
-      return { data, error: null }
+      console.log('User signed up successfully:', firebaseUser.email);
+      
+      // Return user data in consistent format
+      return { 
+        user: firebaseUser, 
+        error: null 
+      };
     } catch (error) {
-      console.error('Signup error:', error)
-      return { data: null, error }
+      console.error('Signup error:', error);
+      return { 
+        user: null, 
+        error 
+      };
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  // Sign in function
+  // Sign in function - authenticates with email/password
   const signIn = async (email, password) => {
     try {
-      setLoading(true)
-      const { data, error } = await authService.signIn(email, password)
+      setLoading(true);
       
-      if (error) {
-        throw error
-      }
+      // Sign in with Firebase
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
       
-      return { data, error: null }
+      console.log('User signed in successfully:', firebaseUser.email);
+      
+      return { 
+        user: firebaseUser, 
+        error: null 
+      };
     } catch (error) {
-      console.error('Signin error:', error)
-      return { data: null, error }
+      console.error('Signin error:', error);
+      return { 
+        user: null, 
+        error 
+      };
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  // Google Sign In function
+  const signInWithGoogle = async () => {
+    try {
+      setLoading(true);
+      
+      // Create Google provider
+      const provider = new GoogleAuthProvider();
+      
+      // Sign in with popup
+      const userCredential = await signInWithPopup(auth, provider);
+      const firebaseUser = userCredential.user;
+      
+      console.log('User signed in with Google:', firebaseUser.email);
+      
+      return { 
+        user: firebaseUser, 
+        error: null 
+      };
+    } catch (error) {
+      console.error('Google signin error:', error);
+      return { 
+        user: null, 
+        error 
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // GitHub Sign In function
+  const signInWithGitHub = async () => {
+    try {
+      setLoading(true);
+      
+      // Create GitHub provider
+      const provider = new GithubAuthProvider();
+      
+      // Sign in with popup
+      const userCredential = await signInWithPopup(auth, provider);
+      const firebaseUser = userCredential.user;
+      
+      console.log('User signed in with GitHub:', firebaseUser.email);
+      
+      return { 
+        user: firebaseUser, 
+        error: null 
+      };
+    } catch (error) {
+      console.error('GitHub signin error:', error);
+      return { 
+        user: null, 
+        error 
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Sign out function
   const signOut = async () => {
     try {
-      setLoading(true)
-      const { error } = await authService.signOut()
+      setLoading(true);
       
-      if (error) {
-        throw error
-      }
+      // Sign out from Firebase
+      await firebaseSignOut(auth);
       
-      // Clear local state
-      setUser(null)
-      setSession(null)
+      console.log('User signed out successfully');
       
-      return { error: null }
+      return { error: null };
     } catch (error) {
-      console.error('Signout error:', error)
-      return { error }
+      console.error('Signout error:', error);
+      return { error };
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  // Update profile function
-  const updateProfile = async (updates) => {
-    try {
-      setLoading(true)
-      const { data, error } = await authService.updateProfile(updates)
-      
-      if (error) {
-        throw error
-      }
-      
-      return { data, error: null }
-    } catch (error) {
-      console.error('Update profile error:', error)
-      return { data: null, error }
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Alias functions for backward compatibility with components
+  const signup = signUp;
+  const login = signIn;
 
-  // Get user display name
+  // Get user display name helper
   const getUserDisplayName = () => {
-    if (!user) return 'Guest'
-    
-    // Try user metadata first
-    const metadata = user.user_metadata || {}
-    if (metadata.full_name) return metadata.full_name
-    if (metadata.first_name) return metadata.first_name
-    
-    // Fallback to email username
-    if (user.email) {
-      return user.email.split('@')[0]
-    }
-    
-    return 'User'
-  }
+    if (!user) return 'Guest';
+    return user.displayName || user.email?.split('@')[0] || 'User';
+  };
 
-  // Get user initials
+  // Get user initials helper
   const getUserInitials = () => {
-    if (!user) return 'G'
+    if (!user) return 'G';
     
-    const metadata = user.user_metadata || {}
-    
-    // Try to get initials from first/last name
-    if (metadata.first_name && metadata.last_name) {
-      return `${metadata.first_name[0]}${metadata.last_name[0]}`.toUpperCase()
-    }
-    
-    // Try full name
-    if (metadata.full_name) {
-      const names = metadata.full_name.split(' ')
+    if (user.displayName) {
+      const names = user.displayName.split(' ');
       if (names.length >= 2) {
-        return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase()
+        return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
       }
-      return names[0][0].toUpperCase()
+      return names[0][0].toUpperCase();
     }
     
-    // Fallback to email
     if (user.email) {
-      return user.email[0].toUpperCase()
+      return user.email[0].toUpperCase();
     }
     
-    return 'U'
-  }
+    return 'U';
+  };
+
+  // Get user profile picture
+  const getUserPhotoURL = () => {
+    if (!user) return null;
+    return user.photoURL;
+  };
 
   const value = {
     user,
-    session,
     loading,
     signUp,
     signIn,
     signOut,
-    updateProfile,
+    signInWithGoogle,
+    signInWithGitHub,
     getUserDisplayName,
     getUserInitials,
+    getUserPhotoURL,
     isAuthenticated: !!user,
-  }
+    // Aliases for backward compatibility
+    signup,
+    login,
+  };
 
   return (
     <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};

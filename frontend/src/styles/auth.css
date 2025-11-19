@@ -2,18 +2,8 @@
 
 .auth-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #e74c3c 0%, #f39c12 25%, #8e44ad 50%, #9b59b6 75%, #3498db 100%);
-  background: linear-gradient(135deg, 
-    rgb(139, 69, 19) 0%,      /* Saddle brown */
-    rgb(160, 82, 45) 15%,     /* Saddle brown lighter */
-    rgb(205, 92, 92) 30%,     /* Indian red */
-    rgb(233, 150, 122) 45%,   /* Dark salmon */
-    rgb(255, 160, 122) 60%,   /* Light salmon */
-    rgb(255, 182, 193) 75%,   /* Light pink */
-    rgb(221, 160, 221) 90%,   /* Plum */
-    rgb(186, 85, 211) 100%    /* Medium orchid */
-  );
-  background: linear-gradient(135deg, #8e44ad 0%, #e91e63 50%, #ff9800 100%);
+  background: #1a2332;
+  background-image: linear-gradient(135deg, rgba(26, 35, 50, 0.98) 0%, rgba(25, 118, 210, 0.08) 50%, rgba(66, 165, 245, 0.05) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,15 +11,15 @@
 }
 
 .auth-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, rgba(30, 40, 55, 0.95) 0%, rgba(25, 45, 70, 0.9) 100%);
+  backdrop-filter: blur(30px);
+  border-radius: 24px;
+  padding: 50px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(25, 118, 210, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 480px;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(25, 118, 210, 0.3);
 }
 
 .auth-header {
@@ -37,26 +27,30 @@
 }
 
 .logo {
-  font-size: 24px;
-  font-weight: bold;
-  background: linear-gradient(135deg, #8e44ad, #e91e63);
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #64b5f6, #42a5f5, #90caf9);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 10px;
+  letter-spacing: 2px;
 }
 
 .auth-title {
-  font-size: 28px;
-  color: #333;
-  margin-bottom: 8px;
-  font-weight: 600;
+  font-size: 32px;
+  color: #e3f2fd;
+  margin-bottom: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 10px rgba(25, 118, 210, 0.3);
 }
 
 .auth-subtitle {
-  color: #666;
+  color: #b3d9ff;
   font-size: 16px;
   margin-bottom: 0;
+  opacity: 0.9;
 }
 
 .auth-form {
@@ -71,45 +65,53 @@
 
 .form-label {
   display: block;
-  margin-bottom: 8px;
-  color: #333;
-  font-weight: 500;
+  margin-bottom: 10px;
+  color: #e3f2fd;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .form-input {
   width: 100%;
-  padding: 15px;
-  border: 2px solid #e0e0e0;
+  padding: 16px;
+  border: 1px solid rgba(25, 118, 210, 0.3);
   border-radius: 10px;
   font-size: 16px;
   transition: all 0.3s ease;
-  background: #fafafa;
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.12) 0%, rgba(25, 118, 210, 0.08) 100%);
   box-sizing: border-box;
+  color: #e3f2fd;
+  font-weight: 500;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #8e44ad;
-  background: #fff;
-  box-shadow: 0 0 10px rgba(142, 68, 173, 0.1);
+  border-color: rgba(25, 118, 210, 0.6);
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.2) 0%, rgba(25, 118, 210, 0.15) 100%);
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.25), 0 4px 12px rgba(25, 118, 210, 0.2);
 }
 
 .auth-button {
-  background: linear-gradient(135deg, #8e44ad, #e91e63, #ff9800);
-  color: white;
-  border: none;
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.4) 0%, rgba(25, 118, 210, 0.35) 100%);
+  color: #64b5f6;
+  border: 1px solid rgba(25, 118, 210, 0.5);
   padding: 16px 32px;
   border-radius: 10px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   margin-top: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  letter-spacing: 0.5px;
 }
 
 .auth-button:hover {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.5) 0%, rgba(25, 118, 210, 0.45) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(142, 68, 173, 0.3);
+  box-shadow: 0 8px 25px rgba(25, 118, 210, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border-color: rgba(25, 118, 210, 0.7);
+  color: #90caf9;
 }
 
 .auth-button:disabled {
@@ -125,14 +127,15 @@
 }
 
 .auth-link p {
-  color: #666;
+  color: #b3d9ff;
   margin-bottom: 10px;
+  opacity: 0.9;
 }
 
 .link-button {
   background: none;
   border: none;
-  color: #8e44ad;
+  color: #64b5f6;
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
@@ -140,7 +143,8 @@
 }
 
 .link-button:hover {
-  color: #e91e63;
+  color: #90caf9;
+  text-shadow: 0 0 8px rgba(66, 165, 245, 0.4);
 }
 
 .error-message {
@@ -161,6 +165,115 @@
   border: 1px solid #cfc;
   margin-bottom: 20px;
   font-size: 14px;
+}
+
+/* OAuth Divider */
+.oauth-divider {
+  text-align: center;
+  margin: 25px 0;
+  position: relative;
+}
+
+.oauth-divider::before,
+.oauth-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 45%;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.oauth-divider::before {
+  left: 0;
+}
+
+.oauth-divider::after {
+  right: 0;
+}
+
+.oauth-divider-text {
+  color: #b3d9ff;
+  font-size: 14px;
+  background: linear-gradient(135deg, rgba(30, 40, 55, 0.95) 0%, rgba(25, 45, 70, 0.9) 100%);
+  padding: 0 15px;
+  position: relative;
+  opacity: 0.9;
+}
+
+/* OAuth Buttons Container */
+.oauth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+/* Standard OAuth Button */
+.oauth-button {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid rgba(25, 118, 210, 0.3);
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.15) 0%, rgba(25, 118, 210, 0.1) 100%);
+  color: #e3f2fd;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.oauth-button:hover {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.25) 0%, rgba(25, 118, 210, 0.2) 100%);
+  box-shadow: 0 5px 15px rgba(25, 118, 210, 0.3);
+  border-color: rgba(25, 118, 210, 0.5);
+  transform: translateY(-2px);
+}
+
+.oauth-button:active {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.3) 0%, rgba(25, 118, 210, 0.25) 100%);
+  transform: translateY(0);
+}
+
+.oauth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.oauth-button-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Google Button Specific Styles */
+.oauth-button-google {
+  border-color: rgba(25, 118, 210, 0.3);
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.15) 0%, rgba(25, 118, 210, 0.1) 100%);
+}
+
+.oauth-button-google:hover {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.25) 0%, rgba(25, 118, 210, 0.2) 100%);
+  box-shadow: 0 5px 15px rgba(25, 118, 210, 0.3);
+}
+
+/* GitHub Button Specific Styles */
+.oauth-button-github {
+  border-color: #24292e;
+  background: #24292e;
+  color: white;
+}
+
+.oauth-button-github:hover {
+  background: #2f363d;
 }
 
 /* Responsive Design */

@@ -1,55 +1,72 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/auth.css';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: 'demo@investorsarena.com',
-    password: 'demo123'
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { signIn, signInWithGoogle, signInWithGitHub } = useAuth();
   const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-    // Clear error when user starts typing
-    if (error) setError('');
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    setLoading(true);
 
     try {
-      // Basic validation for demo
-      if (!formData.email || !formData.password) {
-        throw new Error('Please fill in all fields');
-      }
-
-      if (!formData.email.includes('@')) {
-        throw new Error('Please enter a valid email address');
-      }
-
-      if (formData.password.length < 3) {
-        throw new Error('Password must be at least 3 characters for demo');
-      }
-
-      // Mock authentication - simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { user, error: signInError } = await signIn(email, password);
       
-      console.log('Demo login successful for:', formData.email);
-      
-      // Always succeed and redirect to dashboard
-      navigate('/dashboard');
-      
+      if (signInError) {
+        setError(signInError.message || 'Failed to sign in');
+      } else if (user) {
+        navigate('/dashboard');
+      }
     } catch (err) {
+      setError('An unexpected error occurred');
       console.error('Login error:', err);
-      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setLoading(true);
+
+    try {
+      const { user, error: signInError } = await signInWithGoogle();
+      
+      if (signInError) {
+        setError(signInError.message || 'Failed to sign in with Google');
+      } else if (user) {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error('Google sign in error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGitHubSignIn = async () => {
+    setError('');
+    setLoading(true);
+
+    try {
+      const { user, error: signInError } = await signInWithGitHub();
+      
+      if (signInError) {
+        setError(signInError.message || 'Failed to sign in with GitHub');
+      } else if (user) {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error('GitHub sign in error:', err);
     } finally {
       setLoading(false);
     }
@@ -59,11 +76,9 @@ const Login = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="logo">InvestorsArena</div>
-          <h1 className="auth-title">Demo Login</h1>
-          <p className="auth-subtitle">
-            Enter any email and password to access the platform
-          </p>
+          <div className="logo">INVESTORS ARENA</div>
+          <h1 className="auth-title">Welcome Back</h1>
+          <p className="auth-subtitle">Sign in to continue to your account</p>
         </div>
 
         {error && (
@@ -75,17 +90,16 @@ const Login = () => {
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label" htmlFor="email">
-              Email Address
+              Email
             </label>
             <input
-              type="email"
               id="email"
-              name="email"
+              type="email"
               className="form-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
               placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={loading}
             />
           </div>
 
@@ -94,19 +108,18 @@ const Login = () => {
               Password
             </label>
             <input
-              type="password"
               id="password"
-              name="password"
+              type="password"
               className="form-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
               placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={loading}
             />
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="auth-button"
             disabled={loading}
           >
@@ -114,14 +127,37 @@ const Login = () => {
           </button>
         </form>
 
+        <div className="oauth-divider">
+          <span className="oauth-divider-text">OR</span>
+        </div>
+
+        <div className="oauth-buttons">
+          <button
+            type="button"
+            className="oauth-button oauth-button-google"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+          >
+            <span className="oauth-button-icon">🔵</span>
+            Sign in with Google
+          </button>
+
+          <button
+            type="button"
+            className="oauth-button oauth-button-github"
+            onClick={handleGitHubSignIn}
+            disabled={loading}
+          >
+            <span className="oauth-button-icon">⚫</span>
+            Sign in with GitHub
+          </button>
+        </div>
+
         <div className="auth-link">
           <p>Don't have an account?</p>
-          <button 
-            className="link-button"
-            onClick={() => navigate('/signup')}
-          >
-            Create your account
-          </button>
+          <Link to="/signup" className="link-button">
+            Sign up here
+          </Link>
         </div>
       </div>
     </div>
@@ -129,3 +165,4 @@ const Login = () => {
 };
 
 export default Login;
+

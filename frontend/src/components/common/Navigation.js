@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/navigation.css';
 
 const Navigation = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { signOut, getUserDisplayName, getUserInitials, getUserPhotoURL } = useAuth();
 
-  const handleLogout = () => {
-    setIsProfileOpen(false); // Close dropdown
-    console.log('Demo logout - redirecting to login');
-    navigate('/login'); // Redirect to login to show complete auth flow
+  const handleLogout = async () => {
+    setIsProfileOpen(false);
+    console.log('Logging out user');
+    
+    const { error } = await signOut();
+    if (error) {
+      console.error('Logout error:', error);
+    } else {
+      navigate('/login');
+    }
   };
 
   const toggleProfile = () => {
@@ -29,6 +37,10 @@ const Navigation = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isProfileOpen]);
 
+  // Get real user data from Firebase auth
+  const displayName = getUserDisplayName();
+  const initials = getUserInitials();
+  const photoURL = getUserPhotoURL();
 
   return (
     <nav className="navbar">
@@ -71,9 +83,13 @@ const Navigation = () => {
             onClick={toggleProfile}
           >
             <div className="profile-avatar">
-              
+              {photoURL ? (
+                <img src={photoURL} alt={displayName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                initials
+              )}
             </div>
-            <span>TEST USER</span>
+            <span>{displayName}</span>
             <span className="dropdown-arrow">▼</span>
           </button>
 

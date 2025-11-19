@@ -65,24 +65,28 @@ const Market = () => {
       
       <div className="main-content">
         <div style={{ 
-          background: 'rgba(255, 255, 255, 0.95)', 
-          borderRadius: '20px', 
-          padding: '40px',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)'
+          background: 'linear-gradient(135deg, rgba(30, 40, 55, 0.9) 0%, rgba(25, 45, 70, 0.85) 100%)', 
+          borderRadius: '24px', 
+          padding: '50px',
+          backdropFilter: 'blur(20px)',
+          boxShadow: '0 25px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(25, 118, 210, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          border: '1px solid rgba(25, 118, 210, 0.3)'
         }}>
           <h1 style={{ 
-            fontSize: '32px', 
-            color: '#333', 
+            fontSize: '38px', 
+            color: '#e3f2fd',
+            fontWeight: '800',
             marginBottom: '20px',
             display: 'flex',
             alignItems: 'center',
-            gap: '15px'
+            gap: '15px',
+            letterSpacing: '2px',
+            textShadow: '0 2px 10px rgba(25, 118, 210, 0.3)'
           }}>
             MARKET OVERVIEW
           </h1>
           
-          <p style={{ color: '#666', fontSize: '18px', marginBottom: '30px' }}>
+          <p style={{ color: '#b3d9ff', fontSize: '18px', marginBottom: '30px', opacity: 0.9 }}>
             Stay updated with real-time market data, indices, and trending stocks.
           </p>
 
@@ -97,7 +101,9 @@ const Market = () => {
             marginBottom: '30px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between'
+            justifyContent: 'space-between',
+            border: '2px solid rgba(25, 118, 210, 0.3)',
+            boxShadow: '0 4px 15px rgba(25, 118, 210, 0.2), 0 0 0 1px rgba(66, 165, 245, 0.1) inset'
           }}>
             <div>
               <h3 style={{ fontSize: '18px', marginBottom: '5px' }}>
@@ -129,7 +135,7 @@ const Market = () => {
                 <div 
                   key={index.symbol}
                   style={{ 
-                    background: 'white',
+                    background: '#bbdefb',
                     borderRadius: '15px',
                     padding: '25px',
                     boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
@@ -155,10 +161,10 @@ const Market = () => {
               Top Movers
             </h2>
             
-            <div style={{ background: 'white', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
+            <div style={{ background: 'linear-gradient(135deg, rgba(25, 118, 210, 0.15) 0%, rgba(25, 118, 210, 0.08) 100%)', border: '1px solid rgba(25, 118, 210, 0.3)', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)' }}>
               {/* Table Header */}
               <div style={{ 
-                background: '#f8f9fa', 
+                background: '#90caf9', 
                 padding: '20px', 
                 display: 'grid', 
                 gridTemplateColumns: '1fr 2fr 1fr',
@@ -220,7 +226,7 @@ const Market = () => {
               Market Calendar
             </h2>
             
-            <div style={{ background: 'white', borderRadius: '15px', padding: '25px', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
+            <div style={{ background: 'linear-gradient(135deg, rgba(25, 118, 210, 0.15) 0%, rgba(25, 118, 210, 0.08) 100%)', border: '1px solid rgba(25, 118, 210, 0.3)', borderRadius: '18px', padding: '30px', boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
                 <div>
                   <h4 style={{ color: '#333', marginBottom: '10px' }}>Today</h4>
