@@ -9,7 +9,7 @@ import { TrendingUp, Star, AlertCircle } from 'lucide-react';
 import { getRemainingAPICalls } from '../services/alphaVantage';
 import { StockCard } from '../components/Market/StockCard';
 import { MarketMoverCard } from '../components/Market/MarketMoverCard';
-import { getQuote, getCompanyOverview, getTopGainersLosers, MarketMover, TopGainersLosers } from '../services/alphaVantage';
+import { getQuote, getCompanyOverview, getTopGainersLosers, TopGainersLosers } from '../services/alphaVantage';
 import { debugAlphaVantageSetup, testSearch } from '../utils/debugAlphaVantage';
 
 interface SelectedStock {
