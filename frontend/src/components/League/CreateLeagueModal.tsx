@@ -155,34 +155,34 @@ export function CreateLeagueModal({ open, onOpenChange, onSubmit }: CreateLeague
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Create New League</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-2xl p-8">
+        <DialogHeader className="space-y-3 pb-2">
+          <DialogTitle className="text-2xl font-bold text-slate-900">Create New League</DialogTitle>
+          <DialogDescription className="text-base text-slate-600">
             Set up your fantasy stock league in {step === 3 ? "3" : "a few"} steps
           </DialogDescription>
           <DialogClose onClick={() => onOpenChange(false)} />
         </DialogHeader>
 
         {/* Progress Indicator */}
-        <div className="flex items-center justify-center gap-2 my-4">
+        <div className="flex items-center justify-center gap-2 my-6">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center">
               <div
-                className={`flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all ${
+                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all font-semibold ${
                   s === step
                     ? "border-blue-600 bg-blue-600 text-white"
                     : s < step
-                    ? "border-green-600 bg-green-600 text-white"
-                    : "border-gray-300 bg-white text-gray-400"
+                    ? "border-emerald-600 bg-emerald-600 text-white"
+                    : "border-slate-300 bg-white text-slate-400"
                 }`}
               >
-                {s < step ? <Check className="h-4 w-4" /> : s}
+                {s < step ? <Check className="h-5 w-5" /> : s}
               </div>
               {s < 3 && (
                 <div
-                  className={`w-12 h-0.5 mx-2 ${
-                    s < step ? "bg-green-600" : "bg-gray-300"
+                  className={`w-16 h-0.5 mx-2 ${
+                    s < step ? "bg-emerald-600" : "bg-slate-300"
                   }`}
                 />
               )}
@@ -519,10 +519,16 @@ export function CreateLeagueModal({ open, onOpenChange, onSubmit }: CreateLeague
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between mt-6 pt-6 border-t">
+        <div className="flex justify-between mt-8 pt-6 border-t border-slate-200">
           {step > 1 ? (
-            <Button variant="outline" onClick={handleBack} disabled={isSubmitting}>
-              <ChevronLeft className="h-4 w-4 mr-1" />
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handleBack}
+              disabled={isSubmitting}
+              className="border-slate-300 hover:bg-slate-50 text-slate-700 font-medium h-12 px-6"
+            >
+              <ChevronLeft className="h-5 w-5 mr-1" />
               Back
             </Button>
           ) : (
@@ -531,21 +537,23 @@ export function CreateLeagueModal({ open, onOpenChange, onSubmit }: CreateLeague
 
           {step < 3 ? (
             <Button
+              size="lg"
               onClick={handleNext}
-              className="bg-gradient-to-r from-blue-600 to-indigo-500 text-white"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-sm h-12 px-6"
             >
               Next
-              <ChevronRight className="h-4 w-4 ml-1" />
+              <ChevronRight className="h-5 w-5 ml-1" />
             </Button>
           ) : (
             <Button
+              size="lg"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="bg-gradient-to-r from-green-600 to-emerald-500 text-white"
+              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium shadow-sm h-12 px-6"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                   Creating...
                 </>
               ) : (

@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import { HomeNew } from "./pages/HomeNew";
 import Login from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
@@ -39,6 +40,16 @@ export default function App() {
           <Route path="/news" element={<NewsNew />} />
         </Routes>
       </HashRouter>
+      {/* Toast Notifications */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            maxWidth: '500px',
+          },
+        }}
+      />
     </AuthProvider>
   );
 }

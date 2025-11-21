@@ -1,14 +1,32 @@
 import "../../styles/HomeNew.css";
+import { useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { UnifiedNav } from "../Shared/UnifiedNav/UnifiedNav";
 import { Footer } from "../Shared/Footer/Footer";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { ArrowRight, Users, Trophy, Target, CheckCircle2 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { TimelineStep } from "./TimelineStep/TimelineStep";
 import { LiveMarketWidget } from "./LiveMarketWidget/LiveMarketWidget";
+import { useAuth } from "../../contexts/AuthContext";
 
 export function HomeNew() {
+  const navigate = useNavigate();
+  const auth = useAuth() as any;
+  const user = auth?.user;
+
+  // Redirect logged-in users to dashboard
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
+
+  // Don't render landing page if user is logged in
+  if (user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <UnifiedNav variant="home" />

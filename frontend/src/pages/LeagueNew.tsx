@@ -15,6 +15,7 @@ import {
   Loader2,
   AlertCircle,
   TrendingUp,
+  Users,
 } from "lucide-react";
 import { CreateLeagueModal } from "../components/League/CreateLeagueModal";
 import { JoinLeagueModal } from "../components/League/JoinLeagueModal";
@@ -37,6 +38,7 @@ import {
 } from "../services/leagueService";
 import { sortLeagues, filterLeagues } from "../utils/leagueUtils";
 import { useAuth } from "../contexts/AuthContext";
+import { showSuccessToast, showErrorToast, showLoadingToast, dismissToast } from "../utils/toastUtils";
 
 export function LeagueNew() {
   // Get current user from Firebase Auth (must be first - before any conditional returns)
@@ -79,8 +81,8 @@ export function LeagueNew() {
   // Show loading state while authenticating
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="h-8 w-8 animate-spin text-slate-600" />
       </div>
     );
   }
@@ -88,12 +90,15 @@ export function LeagueNew() {
   // Redirect if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="p-8 text-center">
-          <AlertCircle className="h-12 w-12 text-orange-600 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
-          <p className="text-gray-600 mb-4">Please sign in to view and create leagues.</p>
-          <Button onClick={() => window.location.href = '/signin'}>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Card className="p-10 text-center max-w-md border-slate-200 shadow-lg">
+          <AlertCircle className="h-12 w-12 text-amber-600 mx-auto mb-5" />
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Authentication Required</h2>
+          <p className="text-slate-600 mb-6 text-base leading-relaxed">Please sign in to view and create leagues.</p>
+          <Button
+            className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm"
+            onClick={() => window.location.href = '/signin'}
+          >
             Go to Sign In
           </Button>
         </Card>
@@ -157,15 +162,21 @@ export function LeagueNew() {
 
   const handleCreateLeague = async (formData: CreateLeagueFormData) => {
     if (!user) return;
+
+    const loadingToast = showLoadingToast('Creating league...');
     setActionLoading(true);
+
     try {
       const { data, error: err } = await createLeague(user.uid, formData);
+
+      dismissToast(loadingToast);
+
       if (err) {
         // Check for specific error messages
         if (err.message?.includes('User not found')) {
-          alert("Cannot create league: Your account is not in the database. Please contact support.");
+          showErrorToast("Cannot create league: Your account is not in the database. Please contact support.");
         } else {
-          alert(`Error creating league: ${err.message || 'Unknown error'}`);
+          showErrorToast(err.message || 'Failed to create league. Please try again.');
         }
         throw err;
       }
@@ -177,7 +188,7 @@ export function LeagueNew() {
       }
 
       // Show success message
-      alert(`✅ League "${data?.name}" created successfully!`);
+      showSuccessToast(`League "${data?.name}" created successfully!`);
       console.log("✅ League created successfully:", data?.name);
     } catch (err: any) {
       console.error("Error creating league:", err);
@@ -189,10 +200,19 @@ export function LeagueNew() {
 
   const handleJoinLeague = async (leagueId: string) => {
     if (!user) return;
+
+    const loadingToast = showLoadingToast('Joining league...');
     setActionLoading(true);
+
     try {
-      const { error: err } = await joinLeague(user.uid, leagueId);
-      if (err) throw err;
+      const { data, error: err } = await joinLeague(user.uid, leagueId);
+
+      dismissToast(loadingToast);
+
+      if (err) {
+        showErrorToast(err.message || "Failed to join league");
+        throw err;
+      }
 
       // Refresh leagues
       await loadMyLeagues();
@@ -201,10 +221,10 @@ export function LeagueNew() {
       // Close details modal if open
       setShowDetailsModal(false);
 
+      showSuccessToast("Successfully joined league!");
       console.log("✅ Successfully joined league");
     } catch (err: any) {
       console.error("Error joining league:", err);
-      alert(err.message || "Failed to join league");
     } finally {
       setActionLoading(false);
     }
@@ -212,14 +232,24 @@ export function LeagueNew() {
 
   const handleJoinByCode = async (joinCode: string) => {
     if (!user) return;
+
+    const loadingToast = showLoadingToast('Joining league...');
     setActionLoading(true);
+
     try {
       const { error: err } = await joinLeagueByCode(user.uid, joinCode);
-      if (err) throw err;
+
+      dismissToast(loadingToast);
+
+      if (err) {
+        showErrorToast(err.message || "Invalid join code or failed to join league");
+        throw err;
+      }
 
       // Refresh leagues
       await loadMyLeagues();
 
+      showSuccessToast("Successfully joined league with code!");
       console.log("✅ Successfully joined league with code");
     } catch (err: any) {
       console.error("Error joining league by code:", err);
@@ -234,10 +264,18 @@ export function LeagueNew() {
     // eslint-disable-next-line no-restricted-globals
     if (!confirm("Are you sure you want to leave this league?")) return;
 
+    const loadingToast = showLoadingToast('Leaving league...');
     setActionLoading(true);
+
     try {
       const { error: err } = await leaveLeague(user.uid, leagueId);
-      if (err) throw err;
+
+      dismissToast(loadingToast);
+
+      if (err) {
+        showErrorToast("Failed to leave league");
+        throw err;
+      }
 
       // Refresh leagues
       await loadMyLeagues();
@@ -246,10 +284,10 @@ export function LeagueNew() {
       // Close details modal if open
       setShowDetailsModal(false);
 
+      showSuccessToast("Successfully left league");
       console.log("✅ Successfully left league");
     } catch (err: any) {
       console.error("Error leaving league:", err);
-      alert("Failed to leave league");
     } finally {
       setActionLoading(false);
     }
@@ -291,35 +329,33 @@ export function LeagueNew() {
   const filteredMyLeagues = getFilteredLeagues(myLeagues);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-hidden">
-      {/* Background decorative shapes */}
-      <div className="absolute top-20 left-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-10 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-400/5 rounded-full blur-3xl" />
-
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-slate-50/50 to-slate-100">
       <UnifiedNav variant="fantasy" />
 
-      <main className="flex-1 py-8">
-        <div className="mx-auto max-w-[1600px] px-6 lg:px-8">
+      <main className="flex-1 py-12">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Leagues</h1>
-                <p className="text-gray-600">
-                  Compete with other investors in fantasy stock leagues
+          <div className="mb-12">
+            <div className="flex items-start justify-between mb-8">
+              <div className="flex-1">
+                <h1 className="text-5xl font-bold text-slate-900 mb-3 tracking-tight">Leagues</h1>
+                <p className="text-lg text-slate-600 max-w-4xl leading-relaxed">
+                  Compete with investors, showcase your strategy, and climb the leaderboard in fantasy stock leagues.
                 </p>
               </div>
               <div className="flex gap-3">
                 <Button
-                  className="bg-gradient-to-r from-purple-600 to-pink-500 text-white"
+                  size="lg"
+                  variant="outline"
+                  className="border-slate-300 hover:bg-slate-100 text-slate-700 shadow-sm"
                   onClick={() => setShowJoinModal(true)}
                 >
                   <Key className="h-4 w-4 mr-2" />
                   Join with Code
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-blue-600 to-indigo-500 text-white"
+                  size="lg"
+                  className="bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20"
                   onClick={() => setShowCreateModal(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -329,53 +365,58 @@ export function LeagueNew() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <Card className="p-4 bg-gradient-to-br from-blue-50 to-white border-blue-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <TrendingUp className="h-5 w-5 text-blue-600" />
+            <div className="grid grid-cols-3 gap-6">
+              <Card className="p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-slate-700" />
                   </div>
-                  <div>
-                    <div className="text-sm text-gray-600">My Leagues</div>
-                    <div className="text-2xl font-bold text-gray-900">{myLeagues.length}</div>
-                  </div>
+                  <Badge variant="secondary" className="bg-slate-100 text-slate-700 border-0">
+                    Active
+                  </Badge>
                 </div>
+                <div className="text-3xl font-bold text-slate-900 mb-1">{myLeagues.length}</div>
+                <div className="text-sm text-slate-600 font-medium">My Leagues</div>
               </Card>
-              <Card className="p-4 bg-gradient-to-br from-green-50 to-white border-green-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <Plus className="h-5 w-5 text-green-600" />
+
+              <Card className="p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
+                    <Users className="h-6 w-6 text-emerald-600" />
                   </div>
-                  <div>
-                    <div className="text-sm text-gray-600">Public Leagues</div>
-                    <div className="text-2xl font-bold text-gray-900">{publicLeagues.length}</div>
-                  </div>
+                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-0">
+                    Open
+                  </Badge>
                 </div>
+                <div className="text-3xl font-bold text-slate-900 mb-1">{publicLeagues.length}</div>
+                <div className="text-sm text-slate-600 font-medium">Public Leagues</div>
               </Card>
-              <Card className="p-4 bg-gradient-to-br from-purple-50 to-white border-purple-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                    <Key className="h-5 w-5 text-purple-600" />
+
+              <Card className="p-6 bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center">
+                    <Key className="h-6 w-6 text-violet-600" />
                   </div>
-                  <div>
-                    <div className="text-sm text-gray-600">Private Leagues</div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {myLeagues.filter((l) => !l.is_public).length}
-                    </div>
-                  </div>
+                  <Badge variant="secondary" className="bg-violet-50 text-violet-700 border-0">
+                    Private
+                  </Badge>
                 </div>
+                <div className="text-3xl font-bold text-slate-900 mb-1">
+                  {myLeagues.filter((l) => !l.is_public).length}
+                </div>
+                <div className="text-sm text-slate-600 font-medium">Private Leagues</div>
               </Card>
             </div>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
+            <div className="mb-6 p-5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 shadow-sm">
+              <AlertCircle className="h-5 w-5 text-rose-600 mt-0.5 shrink-0" />
               <div>
-                <p className="text-red-800 font-medium">Error loading leagues</p>
-                <p className="text-red-600 text-sm mt-1">{error}</p>
-                <p className="text-red-600 text-sm mt-2">
+                <p className="text-rose-900 font-semibold">Error loading leagues</p>
+                <p className="text-rose-700 text-sm mt-1.5">{error}</p>
+                <p className="text-rose-600 text-sm mt-2">
                   Make sure you've run the database schema SQL and configured your Supabase
                   environment variables.
                 </p>
@@ -385,31 +426,41 @@ export function LeagueNew() {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-6">
-              <TabsTrigger value="my">
+            <TabsList className="mb-8 bg-white border border-slate-200 p-1 shadow-sm">
+              <TabsTrigger
+                value="my"
+                className="data-[state=active]:bg-slate-900 data-[state=active]:text-white data-[state=inactive]:text-slate-600 font-medium"
+              >
                 My Leagues
                 {myLeagues.length > 0 && (
-                  <Badge className="ml-2 bg-blue-600 text-white">{myLeagues.length}</Badge>
+                  <Badge className="ml-2 bg-slate-100 text-slate-700 data-[state=active]:bg-slate-800 data-[state=active]:text-white border-0">
+                    {myLeagues.length}
+                  </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="public">
+              <TabsTrigger
+                value="public"
+                className="data-[state=active]:bg-slate-900 data-[state=active]:text-white data-[state=inactive]:text-slate-600 font-medium"
+              >
                 Public Leagues
                 {publicLeagues.length > 0 && (
-                  <Badge className="ml-2 bg-green-600 text-white">{publicLeagues.length}</Badge>
+                  <Badge className="ml-2 bg-slate-100 text-slate-700 data-[state=active]:bg-slate-800 data-[state=active]:text-white border-0">
+                    {publicLeagues.length}
+                  </Badge>
                 )}
               </TabsTrigger>
             </TabsList>
 
             {/* Filters */}
-            <div className="flex gap-4 mb-6">
+            <div className="flex gap-4 mb-8">
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input
                     placeholder="Search leagues..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-slate-400 h-11"
                   />
                 </div>
               </div>
@@ -434,32 +485,39 @@ export function LeagueNew() {
             {/* My Leagues Tab */}
             <TabsContent value="my">
               {loadingMy ? (
-                <div className="flex items-center justify-center py-16">
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="h-8 w-8 animate-spin text-slate-600" />
                 </div>
               ) : filteredMyLeagues.length === 0 ? (
-                <Card className="p-12 text-center bg-white/80 backdrop-blur-sm">
+                <Card className="p-12 text-center bg-white border-slate-200 shadow-sm">
                   <div className="max-w-md mx-auto">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Plus className="h-8 w-8 text-blue-600" />
+                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                      <Plus className="h-8 w-8 text-slate-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-xl font-semibold text-slate-900 mb-2">
                       {searchQuery || statusFilter !== "all"
                         ? "No leagues found"
                         : "No leagues yet"}
                     </h3>
-                    <p className="text-gray-600 mb-6">
+                    <p className="text-slate-600 text-base mb-7 leading-relaxed">
                       {searchQuery || statusFilter !== "all"
                         ? "Try adjusting your search or filters"
                         : "Create your first league or join an existing one to get started"}
                     </p>
                     {!searchQuery && statusFilter === "all" && (
                       <div className="flex gap-3 justify-center">
-                        <Button onClick={() => setShowCreateModal(true)}>
+                        <Button
+                          className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm"
+                          onClick={() => setShowCreateModal(true)}
+                        >
                           <Plus className="h-4 w-4 mr-2" />
                           Create League
                         </Button>
-                        <Button variant="outline" onClick={() => setActiveTab("public")}>
+                        <Button
+                          variant="outline"
+                          className="border-slate-300 text-slate-700 hover:bg-slate-50"
+                          onClick={() => setActiveTab("public")}
+                        >
                           Browse Public Leagues
                         </Button>
                       </div>
@@ -484,23 +542,26 @@ export function LeagueNew() {
             {/* Public Leagues Tab */}
             <TabsContent value="public">
               {loadingPublic ? (
-                <div className="flex items-center justify-center py-16">
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="h-8 w-8 animate-spin text-slate-600" />
                 </div>
               ) : filteredPublicLeagues.length === 0 ? (
-                <Card className="p-12 text-center bg-white/80 backdrop-blur-sm">
+                <Card className="p-12 text-center bg-white border-slate-200 shadow-sm">
                   <div className="max-w-md mx-auto">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Search className="h-8 w-8 text-green-600" />
+                    <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                      <Search className="h-8 w-8 text-emerald-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No public leagues found</h3>
-                    <p className="text-gray-600 mb-6">
+                    <h3 className="text-xl font-semibold text-slate-900 mb-2">No public leagues found</h3>
+                    <p className="text-slate-600 text-base mb-7 leading-relaxed">
                       {searchQuery || statusFilter !== "all"
                         ? "Try adjusting your search or filters"
                         : "Be the first to create a public league!"}
                     </p>
                     {!searchQuery && statusFilter === "all" && (
-                      <Button onClick={() => setShowCreateModal(true)}>
+                      <Button
+                        className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm"
+                        onClick={() => setShowCreateModal(true)}
+                      >
                         <Plus className="h-4 w-4 mr-2" />
                         Create Public League
                       </Button>
