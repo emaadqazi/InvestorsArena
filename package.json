@@ -21,7 +21,8 @@
   },
   "homepage": "https://github.com/emaadqazi/InvestorsArena#readme",
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "supabase": "^2.63.1"
   },
   "dependencies": {
     "react": "^19.2.0"

@@ -247,7 +247,7 @@ export async function searchStocks(
     let queryBuilder = supabase
       .from("stocks")
       .select("*")
-      .or(`symbol.ilike.%${query}%,name.ilike.%${query}%`);
+      .or(`ticker.ilike.%${query}%,name.ilike.%${query}%`);
 
     if (sectorTag) {
       queryBuilder = queryBuilder.eq("sector_tag", sectorTag);

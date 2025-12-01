@@ -210,7 +210,10 @@ export function MarketNew() {
 
   // Sync stock to database and add to Fantasy portfolio
   const handleAddToFantasyPortfolio = async () => {
-    if (!user?.uid || !pendingStock || !selectedLeagueId || !selectedSlot) return;
+    if (!user?.uid || !pendingStock || !selectedLeagueId || !selectedSlot) {
+      console.error('Missing required data:', { uid: user?.uid, pendingStock, selectedLeagueId, selectedSlot });
+      return;
+    }
 
     setAddingToFantasy(true);
     const loadingToast = showLoadingToast('Adding stock to portfolio...');
@@ -220,16 +223,24 @@ export function MarketNew() {
       const stockPrice = pendingStock.price ? parseFloat(pendingStock.price) : 0;
       const marketCapTier = getMarketCapTier(pendingStock.marketCap);
 
-      const { data: existingStock } = await supabase
+      console.log('Step 1: Checking if stock exists...', { symbol: pendingStock.symbol });
+
+      let existingStock = null;
+      let stockId: string;
+
+      // Try finding by ticker (main column in database)
+      const { data: stockByTicker, error: tickerError } = await supabase
         .from('stocks')
         .select('id, market_cap_tier')
-        .eq('symbol', pendingStock.symbol)
+        .eq('ticker', pendingStock.symbol)
         .single();
 
-      let stockId: string;
+      console.log('Ticker lookup result:', { stockByTicker, tickerError });
+      existingStock = stockByTicker;
 
       if (existingStock) {
         stockId = existingStock.id;
+        console.log('Stock found, updating price...', { stockId, stockPrice });
         // Update the price
         await supabase
           .from('stocks')
@@ -239,11 +250,12 @@ export function MarketNew() {
           })
           .eq('id', stockId);
       } else {
-        // Insert new stock
+        // Insert new stock using ticker (NOT symbol)
+        console.log('Stock not found, creating with ticker...', { ticker: pendingStock.symbol, marketCapTier });
         const { data: newStock, error: insertError } = await supabase
           .from('stocks')
           .insert({
-            symbol: pendingStock.symbol,
+            ticker: pendingStock.symbol,
             name: pendingStock.name,
             current_price: stockPrice,
             market_cap_tier: marketCapTier,
@@ -251,11 +263,21 @@ export function MarketNew() {
           .select('id')
           .single();
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error('Stock insert error:', insertError);
+          throw insertError;
+        }
         stockId = newStock.id;
+        console.log('Stock created with ID:', stockId);
       }
 
       // Step 2: Add to portfolio
+      console.log('Step 2: Adding to portfolio...', {
+        league_id: selectedLeagueId,
+        stock_id: stockId,
+        slot_name: selectedSlot.slot_name,
+      });
+
       const { data, error } = await addStockToPortfolio(user.uid, {
         league_id: selectedLeagueId,
         user_id: user.uid,
@@ -264,9 +286,15 @@ export function MarketNew() {
         quantity: 1,
       });
 
+      console.log('addStockToPortfolio result:', { data, error });
+
       dismissToast(loadingToast);
 
-      if (error || !data?.success) {
+      if (error) {
+        console.error('Portfolio error:', error);
+        showErrorToast(error.message || 'Failed to add stock to portfolio');
+      } else if (!data?.success) {
+        console.error('Portfolio failed:', data);
         showErrorToast(data?.message || 'Failed to add stock to portfolio');
       } else {
         showSuccessToast(`${pendingStock.symbol} added to ${selectedSlot.slot_name}!`);
@@ -276,7 +304,7 @@ export function MarketNew() {
     } catch (err: any) {
       dismissToast(loadingToast);
       console.error('Error adding stock to Fantasy:', err);
-      showErrorToast('An error occurred while adding the stock');
+      showErrorToast(err.message || 'An error occurred while adding the stock');
     } finally {
       setAddingToFantasy(false);
       setShowFantasyModal(false);
@@ -777,7 +805,7 @@ export function MarketNew() {
             {/* Slot Selection */}
             {selectedLeagueId && (
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <label className="block text-sm font-semibold text-gray-900 mb-3">
                   Select Slot
                 </label>
                 {loadingSlots ? (
@@ -789,34 +817,106 @@ export function MarketNew() {
                     No slots available in this league
                   </p>
                 ) : (
-                  <div className="grid grid-cols-2 gap-3">
-                    {leagueSlots.filter(slot => !slot.is_full).map((slot) => (
-                      <button
-                        key={slot.id}
-                        onClick={() => setSelectedSlot(slot)}
-                        className={`p-4 rounded-xl border-2 transition-all text-left ${
-                          selectedSlot?.id === slot.id
-                            ? 'border-purple-500 bg-purple-50 shadow-md'
-                            : 'border-gray-200 bg-white hover:border-purple-300'
-                        }`}
-                      >
-                        <div className="font-semibold text-gray-900 mb-1">
-                          {slot.slot_name}
+                  <div className="space-y-3">
+                    {/* Large-Cap Row */}
+                    {leagueSlots.filter(s => s.constraint_value === 'Large-Cap' && !s.is_full).length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs font-bold text-blue-700 uppercase tracking-wide">🛡️ Large-Cap Anchors</span>
+                          <div className="flex-1 h-px bg-blue-200"></div>
                         </div>
-                        <div className="text-xs text-gray-600">
-                          {slot.slots_remaining} of {slot.max_count} available
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          {leagueSlots.filter(s => s.constraint_value === 'Large-Cap' && !s.is_full).map((slot) => (
+                            <button
+                              key={slot.id}
+                              onClick={() => setSelectedSlot(slot)}
+                              className={`p-3 rounded-lg border-2 transition-all ${
+                                selectedSlot?.id === slot.id
+                                  ? 'border-blue-500 bg-blue-500 text-white shadow-lg scale-105'
+                                  : 'border-blue-200 bg-blue-50 text-blue-900 hover:border-blue-400 hover:bg-blue-100'
+                              }`}
+                            >
+                              <div className="font-semibold text-sm truncate">{slot.slot_name.replace('Large-Cap ', '')}</div>
+                            </button>
+                          ))}
                         </div>
-                        {slot.constraint_type !== 'wildcard' && (
-                          <div className={`text-xs mt-1 px-2 py-0.5 rounded inline-block ${
-                            slot.constraint_type === 'market_cap' 
-                              ? 'bg-blue-100 text-blue-700' 
-                              : 'bg-indigo-100 text-indigo-700'
-                          }`}>
-                            {slot.constraint_value}
-                          </div>
-                        )}
-                      </button>
-                    ))}
+                      </div>
+                    )}
+
+                    {/* Mid-Cap Row */}
+                    {leagueSlots.filter(s => s.constraint_value === 'Mid-Cap' && !s.is_full).length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">📈 Mid-Cap Growth</span>
+                          <div className="flex-1 h-px bg-emerald-200"></div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          {leagueSlots.filter(s => s.constraint_value === 'Mid-Cap' && !s.is_full).map((slot) => (
+                            <button
+                              key={slot.id}
+                              onClick={() => setSelectedSlot(slot)}
+                              className={`p-3 rounded-lg border-2 transition-all ${
+                                selectedSlot?.id === slot.id
+                                  ? 'border-emerald-500 bg-emerald-500 text-white shadow-lg scale-105'
+                                  : 'border-emerald-200 bg-emerald-50 text-emerald-900 hover:border-emerald-400 hover:bg-emerald-100'
+                              }`}
+                            >
+                              <div className="font-semibold text-sm truncate">{slot.slot_name.replace('Mid-Cap ', '')}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Small-Cap Row */}
+                    {leagueSlots.filter(s => s.constraint_value === 'Small-Cap' && !s.is_full).length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs font-bold text-orange-700 uppercase tracking-wide">🚀 High-Risk Small-Cap</span>
+                          <div className="flex-1 h-px bg-orange-200"></div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          {leagueSlots.filter(s => s.constraint_value === 'Small-Cap' && !s.is_full).map((slot) => (
+                            <button
+                              key={slot.id}
+                              onClick={() => setSelectedSlot(slot)}
+                              className={`p-3 rounded-lg border-2 transition-all ${
+                                selectedSlot?.id === slot.id
+                                  ? 'border-orange-500 bg-orange-500 text-white shadow-lg scale-105'
+                                  : 'border-orange-200 bg-orange-50 text-orange-900 hover:border-orange-400 hover:bg-orange-100'
+                              }`}
+                            >
+                              <div className="font-semibold text-sm truncate">{slot.slot_name.replace('High-Risk ', '')}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Wildcard Row */}
+                    {leagueSlots.filter(s => s.constraint_type === 'wildcard' && !s.is_full).length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs font-bold text-purple-700 uppercase tracking-wide">🎯 Wildcard</span>
+                          <div className="flex-1 h-px bg-purple-200"></div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2">
+                          {leagueSlots.filter(s => s.constraint_type === 'wildcard' && !s.is_full).map((slot) => (
+                            <button
+                              key={slot.id}
+                              onClick={() => setSelectedSlot(slot)}
+                              className={`p-3 rounded-lg border-2 transition-all ${
+                                selectedSlot?.id === slot.id
+                                  ? 'border-purple-500 bg-purple-500 text-white shadow-lg scale-105'
+                                  : 'border-purple-200 bg-purple-50 text-purple-900 hover:border-purple-400 hover:bg-purple-100'
+                              }`}
+                            >
+                              <div className="font-semibold text-sm">{slot.slot_name} — Pick any stock!</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

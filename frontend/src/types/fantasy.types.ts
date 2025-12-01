@@ -22,7 +22,8 @@ export interface SlotWithUsage extends LeagueSlot {
 
 export interface Stock {
   id: string;
-  symbol: string;
+  symbol?: string;  // Optional - some tables use this
+  ticker?: string;  // Optional - some tables use this
   name: string;
   current_price: number;
   sector_tag: string | null;
