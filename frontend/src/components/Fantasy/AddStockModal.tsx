@@ -10,13 +10,14 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Search, Loader2, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
+import { Search, Loader2, TrendingUp, TrendingDown, AlertCircle, Sparkles, Flame } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { searchStocks, addStockToPortfolio } from "../../services/fantasyService";
 import { showSuccessToast, showErrorToast, showLoadingToast, dismissToast } from "../../utils/toastUtils";
 import type { SlotWithUsage, Stock } from "../../types/fantasy.types";
 import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
+import { supabase } from "../../services/supabase";
 
 interface AddStockModalProps {
   open: boolean;
@@ -43,6 +44,43 @@ export function AddStockModal({
 
   const [searching, setSearching] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [recommendations, setRecommendations] = useState<Stock[]>([]);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
+
+  // Fetch recommendations when modal opens
+  useEffect(() => {
+    if (open) {
+      fetchRecommendations();
+    }
+  }, [open, slot]);
+
+  const fetchRecommendations = async () => {
+    setLoadingRecommendations(true);
+    try {
+      let query = supabase
+        .from('stocks')
+        .select('*')
+        .order('current_price', { ascending: false })
+        .limit(6);
+
+      // Apply slot constraints
+      if (slot.constraint_type === 'market_cap' && slot.constraint_value) {
+        query = query.eq('market_cap_tier', slot.constraint_value);
+      } else if (slot.constraint_type === 'sector' && slot.constraint_value) {
+        query = query.eq('sector_tag', slot.constraint_value);
+      }
+
+      const { data, error } = await query;
+
+      if (!error && data) {
+        setRecommendations(data as Stock[]);
+      }
+    } catch (err) {
+      console.error('Error fetching recommendations:', err);
+    } finally {
+      setLoadingRecommendations(false);
+    }
+  };
 
   // Reset state when modal opens
   useEffect(() => {
@@ -212,6 +250,67 @@ export function AddStockModal({
               )}
             </div>
           </div>
+
+          {/* Recommendations Section - shown when not searching */}
+          {searchQuery.length < 2 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Flame className="h-4 w-4 text-orange-500" />
+                <Label className="text-sm font-semibold text-slate-900">
+                  Popular {slot.constraint_type === 'market_cap' ? slot.constraint_value : slot.constraint_type === 'sector' ? slot.constraint_value : ''} Picks
+                </Label>
+                <Sparkles className="h-4 w-4 text-amber-500" />
+              </div>
+              
+              {loadingRecommendations ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+                </div>
+              ) : recommendations.length === 0 ? (
+                <Card className="p-4 text-center border-slate-200">
+                  <p className="text-slate-500 text-sm">No recommendations available</p>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {recommendations.map((stock) => (
+                    <Card
+                      key={stock.id}
+                      className={`p-3 cursor-pointer transition-all border hover:shadow-md ${
+                        selectedStock?.id === stock.id
+                          ? "border-emerald-500 bg-emerald-50 shadow-md"
+                          : "border-slate-200 hover:border-emerald-300 bg-gradient-to-br from-white to-slate-50"
+                      }`}
+                      onClick={() => handleSelectStock(stock)}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <p className="font-bold text-slate-900 text-sm">{stock.symbol}</p>
+                            {stock.daily_change_percent !== null && stock.daily_change_percent > 0 && (
+                              <TrendingUp className="h-3 w-3 text-emerald-500" />
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500 truncate">{stock.name}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="font-semibold text-slate-900 text-sm">
+                            ${stock.current_price.toFixed(2)}
+                          </p>
+                          {stock.daily_change_percent !== null && (
+                            <p className={`text-xs font-medium ${
+                              stock.daily_change_percent >= 0 ? "text-emerald-600" : "text-rose-600"
+                            }`}>
+                              {stock.daily_change_percent >= 0 ? "+" : ""}{stock.daily_change_percent.toFixed(1)}%
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Search Results */}
           {searchQuery.length >= 2 && (

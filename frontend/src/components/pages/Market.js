@@ -126,7 +126,7 @@ const Market = () => {
 
           {/* Market Indices */}
           <div style={{ marginBottom: '40px' }}>
-            <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '20px' }}>
+            <h2 style={{ fontSize: '24px', color: '#e3f2fd', marginBottom: '20px' }}>
               Major Indices
             </h2>
             
@@ -135,16 +135,16 @@ const Market = () => {
                 <div 
                   key={index.symbol}
                   style={{ 
-                    background: '#bbdefb',
+                    background: 'linear-gradient(135deg, rgba(25, 118, 210, 0.15) 0%, rgba(25, 118, 210, 0.08) 100%)',
                     borderRadius: '15px',
                     padding: '25px',
-                    boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
-                    border: '1px solid #f1f3f4'
+                    boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
+                    border: '1px solid rgba(25, 118, 210, 0.3)'
                   }}
                 >
-                  <h3 style={{ color: '#333', marginBottom: '10px', fontSize: '16px' }}>{index.name}</h3>
-                  <div style={{ color: '#666', fontSize: '14px', marginBottom: '8px' }}>{index.symbol}</div>
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#333', marginBottom: '8px' }}>
+                  <h3 style={{ color: '#e3f2fd', marginBottom: '10px', fontSize: '16px' }}>{index.name}</h3>
+                  <div style={{ color: '#b3d9ff', fontSize: '14px', marginBottom: '8px' }}>{index.symbol}</div>
+                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ffffff', marginBottom: '8px' }}>
                     {index.value}
                   </div>
                   <div style={{ color: index.changeColor, fontWeight: 'bold', fontSize: '16px' }}>
@@ -157,20 +157,20 @@ const Market = () => {
 
           {/* Top Movers */}
           <div style={{ marginBottom: '40px' }}>
-            <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '20px' }}>
+            <h2 style={{ fontSize: '24px', color: '#e3f2fd', marginBottom: '20px' }}>
               Top Movers
             </h2>
             
             <div style={{ background: 'linear-gradient(135deg, rgba(25, 118, 210, 0.15) 0%, rgba(25, 118, 210, 0.08) 100%)', border: '1px solid rgba(25, 118, 210, 0.3)', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)' }}>
               {/* Table Header */}
               <div style={{ 
-                background: '#90caf9', 
+                background: 'rgba(25, 118, 210, 0.25)', 
                 padding: '20px', 
                 display: 'grid', 
                 gridTemplateColumns: '1fr 2fr 1fr',
                 fontWeight: 'bold',
-                color: '#333',
-                borderBottom: '1px solid #e9ecef'
+                color: '#e3f2fd',
+                borderBottom: '1px solid rgba(25, 118, 210, 0.3)'
               }}>
                 <div>Symbol</div>
                 <div>Company Name</div>
@@ -189,8 +189,8 @@ const Market = () => {
                     borderBottom: index < topMovers.length - 1 ? '1px solid #f1f3f4' : 'none'
                   }}
                 >
-                  <div style={{ fontWeight: 'bold', color: '#333' }}>{mover.symbol}</div>
-                  <div style={{ color: '#666' }}>{mover.name}</div>
+                  <div style={{ fontWeight: 'bold', color: '#e3f2fd' }}>{mover.symbol}</div>
+                  <div style={{ color: '#b3d9ff' }}>{mover.name}</div>
                   <div style={{ color: mover.changeColor, fontWeight: 'bold', fontSize: '16px' }}>
                     {mover.change}
                   </div>
@@ -201,20 +201,20 @@ const Market = () => {
 
           {/* Market News Section */}
           <div style={{ marginBottom: '40px' }}>
-            <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '20px' }}>
+            <h2 style={{ fontSize: '24px', color: '#e3f2fd', marginBottom: '20px' }}>
               Market News
             </h2>
             
             <div style={{ 
-              background: '#f8f9fa', 
+              background: 'rgba(25, 118, 210, 0.08)', 
               borderRadius: '10px', 
               padding: '40px', 
               textAlign: 'center',
-              border: '2px dashed #ddd'
+              border: '2px dashed rgba(25, 118, 210, 0.3)'
             }}>
               <div style={{ fontSize: '48px', marginBottom: '15px' }}>📰</div>
-              <h3 style={{ color: '#666', marginBottom: '10px' }}>Market News Coming Soon</h3>
-              <p style={{ color: '#888' }}>
+              <h3 style={{ color: '#e3f2fd', marginBottom: '10px' }}>Market News Coming Soon</h3>
+              <p style={{ color: '#b3d9ff' }}>
                 Stay tuned for real-time financial news and market analysis!
               </p>
             </div>
@@ -222,23 +222,23 @@ const Market = () => {
 
           {/* Market Calendar */}
           <div>
-            <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '20px' }}>
+            <h2 style={{ fontSize: '24px', color: '#e3f2fd', marginBottom: '20px' }}>
               Market Calendar
             </h2>
             
             <div style={{ background: 'linear-gradient(135deg, rgba(25, 118, 210, 0.15) 0%, rgba(25, 118, 210, 0.08) 100%)', border: '1px solid rgba(25, 118, 210, 0.3)', borderRadius: '18px', padding: '30px', boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
                 <div>
-                  <h4 style={{ color: '#333', marginBottom: '10px' }}>Today</h4>
-                  <p style={{ color: '#666', margin: 0 }}>No major events scheduled</p>
+                  <h4 style={{ color: '#e3f2fd', marginBottom: '10px' }}>Today</h4>
+                  <p style={{ color: '#b3d9ff', margin: 0 }}>No major events scheduled</p>
                 </div>
                 <div>
-                  <h4 style={{ color: '#333', marginBottom: '10px' }}>This Week</h4>
-                  <p style={{ color: '#666', margin: 0 }}>Fed Interest Rate Decision (Wed)</p>
+                  <h4 style={{ color: '#e3f2fd', marginBottom: '10px' }}>This Week</h4>
+                  <p style={{ color: '#b3d9ff', margin: 0 }}>Fed Interest Rate Decision (Wed)</p>
                 </div>
                 <div>
-                  <h4 style={{ color: '#333', marginBottom: '10px' }}>Earnings</h4>
-                  <p style={{ color: '#666', margin: 0 }}>AAPL, GOOGL, MSFT (Coming)</p>
+                  <h4 style={{ color: '#e3f2fd', marginBottom: '10px' }}>Earnings</h4>
+                  <p style={{ color: '#b3d9ff', margin: 0 }}>AAPL, GOOGL, MSFT (Coming)</p>
                 </div>
               </div>
             </div>

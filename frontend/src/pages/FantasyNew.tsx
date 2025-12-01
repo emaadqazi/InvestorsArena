@@ -18,9 +18,10 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { getUserLeagues, getAvailableSlots, getPortfolioHoldings, getLeagueMemberInfo } from "../services/fantasyService";
+import { getUserLeagues, getAvailableSlots, getPortfolioHoldings, getLeagueMemberInfo, removeStockFromPortfolio } from "../services/fantasyService";
 import { AddStockModal } from "../components/Fantasy/AddStockModal";
 import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
+import { getMarketStatus, MarketStatus } from "../utils/marketHours";
 import type { UserLeagueMember, SlotWithUsage, PortfolioHolding } from "../types/fantasy.types";
 
 export function FantasyNew() {
@@ -39,12 +40,15 @@ export function FantasyNew() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [showAddStockModal, setShowAddStockModal] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<SlotWithUsage | null>(null);
+  const [removingStockId, setRemovingStockId] = useState<string | null>(null);
+  const [marketStatus, setMarketStatus] = useState<MarketStatus>(getMarketStatus());
 
   // Load user's leagues on mount
   useEffect(() => {
     if (user) {
       loadUserLeagues();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // Load slot and portfolio data when league is selected
@@ -52,7 +56,16 @@ export function FantasyNew() {
     if (selectedLeague && user) {
       loadLeagueData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedLeague, user]);
+
+  // Update market status every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMarketStatus(getMarketStatus());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const loadUserLeagues = async () => {
     if (!user) return;
@@ -121,6 +134,39 @@ export function FantasyNew() {
     setSelectedSlot(null);
     loadLeagueData(); // Refresh data
     showSuccessToast("Stock added successfully!");
+  };
+
+  const handleRemoveStock = async (holding: PortfolioHolding) => {
+    if (!user || !selectedLeague) return;
+    
+    const stockId = holding.stock_id;
+    setRemovingStockId(stockId);
+    
+    try {
+      const { data, error } = await removeStockFromPortfolio(
+        user.uid,
+        selectedLeague.league_id,
+        stockId
+      );
+      
+      if (error) {
+        showErrorToast("Failed to remove stock: " + error.message);
+        return;
+      }
+      
+      if (data && !data.success) {
+        showErrorToast(data.message || "Failed to remove stock");
+        return;
+      }
+      
+      showSuccessToast("Stock removed successfully!");
+      loadLeagueData(); // Refresh data
+    } catch (err: any) {
+      console.error("Error removing stock:", err);
+      showErrorToast("An error occurred while removing stock");
+    } finally {
+      setRemovingStockId(null);
+    }
   };
 
   const formatCurrency = (value: number) => {
@@ -249,6 +295,36 @@ export function FantasyNew() {
                     </p>
                   </Card>
                 ))}
+              </div>
+            </div>
+
+            {/* Market Status Banner */}
+            <div className={`mb-6 rounded-xl p-4 flex items-center justify-between ${
+              marketStatus.isOpen 
+                ? "bg-emerald-50 border border-emerald-200" 
+                : "bg-amber-50 border border-amber-200"
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${
+                  marketStatus.isOpen ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                }`} />
+                <div>
+                  <p className={`font-semibold ${
+                    marketStatus.isOpen ? "text-emerald-800" : "text-amber-800"
+                  }`}>
+                    {marketStatus.isOpen ? "🟢 Market Open" : "🔴 Market Closed"}
+                  </p>
+                  <p className={`text-sm ${
+                    marketStatus.isOpen ? "text-emerald-600" : "text-amber-600"
+                  }`}>
+                    {marketStatus.message}
+                  </p>
+                </div>
+              </div>
+              <div className={`text-sm font-medium ${
+                marketStatus.isOpen ? "text-emerald-700" : "text-amber-700"
+              }`}>
+                {marketStatus.currentTime} ET
               </div>
             </div>
 
@@ -392,12 +468,16 @@ export function FantasyNew() {
                                   <p className="text-xs text-slate-600">{slotHolding.stock?.name}</p>
                                 </div>
                                 <button
-                                  className="p-1 hover:bg-slate-200 rounded transition-colors"
-                                  onClick={() => {
-                                    // TODO: Remove stock
-                                  }}
+                                  className="p-1 hover:bg-rose-100 rounded transition-colors disabled:opacity-50"
+                                  onClick={() => handleRemoveStock(slotHolding)}
+                                  disabled={removingStockId === slotHolding.stock_id}
+                                  title="Remove stock"
                                 >
-                                  <X className="h-4 w-4 text-slate-500" />
+                                  {removingStockId === slotHolding.stock_id ? (
+                                    <Loader2 className="h-4 w-4 text-slate-500 animate-spin" />
+                                  ) : (
+                                    <X className="h-4 w-4 text-rose-500" />
+                                  )}
                                 </button>
                               </div>
                               <div className="flex items-center justify-between text-sm">
@@ -430,7 +510,7 @@ export function FantasyNew() {
                           {!slot.is_full && (
                             <Button
                               size="sm"
-                              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-sm"
+                              className="w-full shadow-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white"
                               onClick={() => handleAddStock(slot)}
                             >
                               <Plus className="h-4 w-4 mr-1.5" />

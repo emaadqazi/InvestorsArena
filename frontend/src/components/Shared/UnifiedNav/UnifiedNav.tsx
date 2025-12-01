@@ -54,7 +54,7 @@ export function UnifiedNav({ variant }: UnifiedNavProps) {
     if (location.pathname === "/fantasy") return "from-emerald-600 to-teal-500";
     if (location.pathname === "/league") return "from-emerald-600 to-teal-500";
     if (location.pathname === "/challenges") return "from-purple-600 to-pink-500";
-    if (location.pathname === "/market") return "from-orange-600 to-red-500";
+    if (location.pathname === "/market") return "from-emerald-600 to-teal-500";
     if (location.pathname === "/blog" || location.pathname === "/news")
       return "from-emerald-500 to-teal-400";
     return "from-emerald-500 to-teal-400";
