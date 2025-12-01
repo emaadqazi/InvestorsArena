@@ -19,6 +19,17 @@ interface StockCardProps {
   loading?: boolean;
 }
 
+// Helper to determine market cap tier
+function getMarketCapTier(marketCap: string | undefined): { tier: string; color: string; bg: string } | null {
+  if (!marketCap) return null;
+  const value = parseFloat(marketCap);
+  if (isNaN(value)) return null;
+  
+  if (value >= 10_000_000_000) return { tier: 'Large-Cap', color: 'text-blue-700', bg: 'bg-blue-100' };
+  if (value >= 2_000_000_000) return { tier: 'Mid-Cap', color: 'text-emerald-700', bg: 'bg-emerald-100' };
+  return { tier: 'Small-Cap', color: 'text-orange-700', bg: 'bg-orange-100' };
+}
+
 export function StockCard({
   symbol,
   name,
@@ -38,7 +49,7 @@ export function StockCard({
 
   const isPositive = change && parseFloat(change) >= 0;
   const changeColor = isPositive ? 'text-emerald-600' : 'text-red-600';
-  const bgChangeColor = isPositive ? 'bg-emerald-50' : 'bg-red-50';
+  const capTier = getMarketCapTier(marketCap);
 
   const formatMarketCap = (cap?: string) => {
     if (!cap) return 'N/A';
@@ -63,10 +74,17 @@ export function StockCard({
   }
 
   return (
-    <Card className="p-6 border-2 border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all group">
+    <Card className="p-6 border-2 border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all group relative">
+      {/* Market Cap Tier Badge */}
+      {capTier && (
+        <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-semibold ${capTier.bg} ${capTier.color}`}>
+          {capTier.tier}
+        </div>
+      )}
+      
       <div className="flex flex-col h-full">
         {/* Header with Symbol and Watchlist */}
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex items-start justify-between mb-3 pr-20">
           <div className="flex items-center gap-3">
             {/* Logo */}
             {!imageError ? (

@@ -3,6 +3,17 @@ import { Heart, Plus, TrendingUp, TrendingDown } from 'lucide-react';
 import { Button } from '../ui/button';
 import { MarketMover } from '../../services/alphaVantage';
 
+// Helper to determine market cap tier from volume heuristic
+// Since market movers don't have market cap, we'll estimate based on volume
+function estimateCapTier(volume: string): { tier: string; color: string; bg: string } {
+  const vol = parseInt(volume);
+  
+  // Use volume as a rough heuristic (high volume stocks tend to be larger)
+  if (vol >= 50_000_000) return { tier: 'Large-Cap', color: 'text-blue-700', bg: 'bg-blue-100' };
+  if (vol >= 10_000_000) return { tier: 'Mid-Cap', color: 'text-emerald-700', bg: 'bg-emerald-100' };
+  return { tier: 'Small-Cap', color: 'text-orange-700', bg: 'bg-orange-100' };
+}
+
 interface MarketMoverCardProps {
   mover: MarketMover;
   isInWatchlist?: boolean;
@@ -23,9 +34,15 @@ export function MarketMoverCard({
   const changePercent = parseFloat(mover.change_percentage.replace('%', ''));
   const isPositive = changePercent >= 0;
   const changeColor = isPositive ? 'text-emerald-600' : 'text-red-600';
+  const capTier = estimateCapTier(mover.volume);
 
   return (
-    <Card className="p-6 border-2 border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all group">
+    <Card className="p-6 border-2 border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all group relative">
+      {/* Market Cap Tier Badge */}
+      <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-semibold ${capTier.bg} ${capTier.color}`}>
+        {capTier.tier}
+      </div>
+      
       <div className="flex flex-col h-full">
         {/* Header with Symbol and Watchlist */}
         <div className="flex items-start justify-between mb-3">
@@ -37,7 +54,7 @@ export function MarketMoverCard({
           {onToggleWatchlist && (
             <button
               onClick={onToggleWatchlist}
-              className={`p-2 rounded-lg transition-all ${
+              className={`p-2 rounded-lg transition-all mt-4 ${
                 isInWatchlist
                   ? 'text-red-500 bg-red-50 hover:bg-red-100'
                   : 'text-gray-400 hover:text-red-500 hover:bg-red-50'

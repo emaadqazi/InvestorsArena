@@ -8,7 +8,7 @@ interface StockDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   onToggleWatchlist: (symbol: string, name: string) => void;
-  onAddToPortfolio: (symbol: string, name: string) => void;
+  onAddToPortfolio: (symbol: string, name: string, price?: string, marketCap?: string) => void;
   isInWatchlist: boolean;
   isInPortfolio: boolean;
 }
@@ -150,7 +150,12 @@ export function StockDetailModal({
                   {isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
                 </Button>
                 <Button
-                  onClick={() => onAddToPortfolio(symbol, details.overview?.Name || symbol)}
+                  onClick={() => onAddToPortfolio(
+                    symbol, 
+                    details.overview?.Name || symbol,
+                    details.quote?.price,
+                    details.overview?.MarketCapitalization
+                  )}
                   disabled={isInPortfolio}
                   className={`flex-1 ${
                     isInPortfolio

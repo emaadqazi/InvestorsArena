@@ -5,7 +5,7 @@ import { StockSearch } from '../components/Market/StockSearch';
 import { StockDetailModal } from '../components/Market/StockDetailModal';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { usePortfolio } from '../hooks/usePortfolio';
-import { TrendingUp, Star, AlertCircle, Clock, Loader2, X } from 'lucide-react';
+import { TrendingUp, Star, AlertCircle, Loader2, X, Minus, Plus, DollarSign } from 'lucide-react';
 import { getRemainingAPICalls } from '../services/alphaVantage';
 import { StockCard } from '../components/Market/StockCard';
 import { MarketMoverCard } from '../components/Market/MarketMoverCard';
@@ -64,6 +64,7 @@ export function MarketNew() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [addingToFantasy, setAddingToFantasy] = useState(false);
   const [showFantasyModal, setShowFantasyModal] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   const remainingCalls = getRemainingAPICalls();
   const availableSlots = getLocalSlots();
@@ -189,18 +190,19 @@ export function MarketNew() {
     }
   };
 
-  const handleAddToPortfolio = (symbol: string, name: string) => {
-    // Find the stock data from searched stocks
+  const handleAddToPortfolio = (symbol: string, name: string, price?: string, marketCap?: string) => {
+    // Find the stock data from searched stocks (fallback if price not provided)
     const stockData = searchedStocks.find(s => s.symbol === symbol);
     setPendingStock({ 
       symbol, 
       name, 
-      price: stockData?.price,
-      marketCap: stockData?.marketCap 
+      price: price || stockData?.price,
+      marketCap: marketCap || stockData?.marketCap 
     });
     
     // Show Fantasy modal if user is logged in and has leagues
     if (user && userLeagues.length > 0) {
+      setQuantity(1); // Reset quantity
       setShowFantasyModal(true);
     } else {
       // Fallback to local portfolio
@@ -223,39 +225,53 @@ export function MarketNew() {
       const stockPrice = pendingStock.price ? parseFloat(pendingStock.price) : 0;
       const marketCapTier = getMarketCapTier(pendingStock.marketCap);
 
-      console.log('Step 1: Checking if stock exists...', { symbol: pendingStock.symbol });
+      console.log('Step 1: Checking if stock exists...', { symbol: pendingStock.symbol, marketCapTier });
 
-      let existingStock = null;
       let stockId: string;
 
-      // Try finding by ticker (main column in database)
-      const { data: stockByTicker, error: tickerError } = await supabase
+      // Try finding by ticker using maybeSingle() to avoid errors when not found
+      const { data: existingStock, error: searchError } = await supabase
         .from('stocks')
         .select('id, market_cap_tier')
         .eq('ticker', pendingStock.symbol)
-        .single();
+        .maybeSingle();
 
-      console.log('Ticker lookup result:', { stockByTicker, tickerError });
-      existingStock = stockByTicker;
+      if (searchError) {
+        console.error('Stock search error:', searchError);
+        throw searchError;
+      }
+
+      console.log('Stock lookup result:', { existingStock });
 
       if (existingStock) {
+        // Stock exists - update it with latest info
         stockId = existingStock.id;
-        console.log('Stock found, updating price...', { stockId, stockPrice });
-        // Update the price
-        await supabase
+        console.log('Stock found, updating...', { stockId, stockPrice, marketCapTier });
+        
+        const { error: updateError } = await supabase
           .from('stocks')
           .update({ 
             current_price: stockPrice,
-            market_cap_tier: marketCapTier || (existingStock as any).market_cap_tier
+            market_cap_tier: marketCapTier || existingStock.market_cap_tier,
+            symbol: pendingStock.symbol,
+            name: pendingStock.name,
+            updated_at: new Date().toISOString()
           })
           .eq('id', stockId);
+
+        if (updateError) {
+          console.error('Stock update error:', updateError);
+          // Continue anyway - the stock exists
+        }
       } else {
-        // Insert new stock using ticker (NOT symbol)
-        console.log('Stock not found, creating with ticker...', { ticker: pendingStock.symbol, marketCapTier });
+        // Stock doesn't exist - insert it
+        console.log('Stock not found, creating...', { ticker: pendingStock.symbol, marketCapTier });
+        
         const { data: newStock, error: insertError } = await supabase
           .from('stocks')
           .insert({
             ticker: pendingStock.symbol,
+            symbol: pendingStock.symbol,
             name: pendingStock.name,
             current_price: stockPrice,
             market_cap_tier: marketCapTier,
@@ -283,7 +299,7 @@ export function MarketNew() {
         user_id: user.uid,
         stock_id: stockId,
         slot_name: selectedSlot.slot_name,
-        quantity: 1,
+        quantity: quantity,
       });
 
       console.log('addStockToPortfolio result:', { data, error });
@@ -297,9 +313,10 @@ export function MarketNew() {
         console.error('Portfolio failed:', data);
         showErrorToast(data?.message || 'Failed to add stock to portfolio');
       } else {
-        showSuccessToast(`${pendingStock.symbol} added to ${selectedSlot.slot_name}!`);
-        // Refresh slots
+        showSuccessToast(`${quantity} share${quantity > 1 ? 's' : ''} of ${pendingStock.symbol} added to ${selectedSlot.slot_name}!`);
+        // Refresh slots and league data (to update cash balance)
         fetchLeagueSlots(selectedLeagueId);
+        fetchUserLeagues();
       }
     } catch (err: any) {
       dismissToast(loadingToast);
@@ -310,6 +327,7 @@ export function MarketNew() {
       setShowFantasyModal(false);
       setPendingStock(null);
       setSelectedSlot(null);
+      setQuantity(1);
     }
   };
 
@@ -346,7 +364,7 @@ export function MarketNew() {
             </p>
 
             {/* Market Status Banner */}
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${
+            {/* <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${
               marketStatus.isOpen 
                 ? 'bg-emerald-100 text-emerald-800' 
                 : 'bg-amber-100 text-amber-800'
@@ -358,7 +376,7 @@ export function MarketNew() {
               <span className="text-sm opacity-75">
                 {marketStatus.message}
               </span>
-            </div>
+            </div> */}
           </div>
 
           {/* API Status Warning */}
@@ -384,36 +402,6 @@ export function MarketNew() {
               onSelectStock={handleSelectFromSearch}
               placeholder="Search by symbol or company name..."
             />
-          </div>
-
-          {/* Portfolio Slots Info */}
-          <div className="max-w-2xl mx-auto mt-4">
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Star className="h-5 w-5 text-emerald-600" />
-                <span className="text-sm font-semibold text-emerald-900">
-                  Available Portfolio Slots (4-3-3 Formation)
-                </span>
-              </div>
-              <div className="grid grid-cols-4 gap-2 text-xs">
-                <div className="bg-white rounded px-2 py-1 text-center">
-                  <span className="text-emerald-600 font-bold">{availableSlots.defenders}</span>
-                  <span className="text-gray-600"> DEF</span>
-                </div>
-                <div className="bg-white rounded px-2 py-1 text-center">
-                  <span className="text-emerald-600 font-bold">{availableSlots.midfielders}</span>
-                  <span className="text-gray-600"> MID</span>
-                </div>
-                <div className="bg-white rounded px-2 py-1 text-center">
-                  <span className="text-emerald-600 font-bold">{availableSlots.forwards}</span>
-                  <span className="text-gray-600"> FWD</span>
-                </div>
-                <div className="bg-white rounded px-2 py-1 text-center">
-                  <span className="text-emerald-600 font-bold">{availableSlots.keeper}</span>
-                  <span className="text-gray-600"> GK</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Fantasy League Slots Info */}
@@ -500,7 +488,7 @@ export function MarketNew() {
                   isInWatchlist={isInWatchlist(stock.symbol)}
                   isInPortfolio={isInPortfolio(stock.symbol)}
                   onToggleWatchlist={() => toggleWatchlist(stock.symbol, stock.name)}
-                  onAddToPortfolio={() => handleAddToPortfolio(stock.symbol, stock.name)}
+                  onAddToPortfolio={() => handleAddToPortfolio(stock.symbol, stock.name, stock.price, stock.marketCap)}
                   onViewDetails={() => setSelectedSymbol(stock.symbol)}
                 />
               ))}
@@ -567,7 +555,7 @@ export function MarketNew() {
                   isInWatchlist={isInWatchlist(mover.ticker)}
                   isInPortfolio={isInPortfolio(mover.ticker)}
                   onToggleWatchlist={() => toggleWatchlist(mover.ticker, mover.ticker)}
-                  onAddToPortfolio={() => handleAddToPortfolio(mover.ticker, mover.ticker)}
+                  onAddToPortfolio={() => handleAddToPortfolio(mover.ticker, mover.ticker, mover.price)}
                   onViewDetails={() => setSelectedSymbol(mover.ticker)}
                 />
               ))}
@@ -592,7 +580,7 @@ export function MarketNew() {
                   isInWatchlist={isInWatchlist(mover.ticker)}
                   isInPortfolio={isInPortfolio(mover.ticker)}
                   onToggleWatchlist={() => toggleWatchlist(mover.ticker, mover.ticker)}
-                  onAddToPortfolio={() => handleAddToPortfolio(mover.ticker, mover.ticker)}
+                  onAddToPortfolio={() => handleAddToPortfolio(mover.ticker, mover.ticker, mover.price)}
                   onViewDetails={() => setSelectedSymbol(mover.ticker)}
                 />
               ))}
@@ -738,6 +726,7 @@ export function MarketNew() {
                   setShowFantasyModal(false);
                   setPendingStock(null);
                   setSelectedSlot(null);
+                  setQuantity(1);
                 }}
                 className="p-1 hover:bg-gray-100 rounded-full transition-colors"
               >
@@ -758,23 +747,129 @@ export function MarketNew() {
               </div>
             )}
 
-            {/* Stock Info */}
-            <div className="mb-4 p-4 bg-gray-50 rounded-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-lg text-gray-900">{pendingStock.symbol}</p>
-                  <p className="text-sm text-gray-600">{pendingStock.name}</p>
-                </div>
-                {pendingStock.price && (
-                  <div className="text-right">
-                    <p className="font-bold text-lg text-gray-900">${pendingStock.price}</p>
-                    {pendingStock.marketCap && (
-                      <p className="text-xs text-gray-500">
-                        {getMarketCapTier(pendingStock.marketCap) || 'Unknown Cap'}
-                      </p>
-                    )}
+            {/* Budget Display */}
+            {selectedLeagueId && (() => {
+              const selectedLeague = userLeagues.find(l => l.league_id === selectedLeagueId);
+              const currentCash = selectedLeague?.current_cash ?? 0;
+              const stockPrice = pendingStock.price ? parseFloat(pendingStock.price) : 0;
+              const totalCost = stockPrice * quantity;
+              const remainingAfter = currentCash - totalCost;
+              const canAfford = remainingAfter >= 0;
+              
+              return (
+                <div className="mb-4 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="h-5 w-5 text-emerald-600" />
+                    <span className="font-semibold text-emerald-900">Your Budget</span>
                   </div>
-                )}
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-emerald-700">Available Cash</p>
+                      <p className="font-bold text-lg text-emerald-900">${currentCash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                    <div>
+                      <p className="text-emerald-700">After Purchase</p>
+                      <p className={`font-bold text-lg ${canAfford ? 'text-emerald-900' : 'text-red-600'}`}>
+                        ${remainingAfter.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                  </div>
+                  {!canAfford && (
+                    <p className="text-xs text-red-600 mt-2 font-medium">⚠️ Insufficient funds for this purchase</p>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Stock Info with Quantity & Price Calculator */}
+            <div className="mb-4 p-4 bg-gray-50 rounded-xl">
+              {/* Stock Header */}
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="font-bold text-xl text-gray-900">{pendingStock.symbol}</p>
+                  <p className="text-sm text-gray-600">{pendingStock.name}</p>
+                  {pendingStock.marketCap && (
+                    <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                      getMarketCapTier(pendingStock.marketCap) === 'Large-Cap' ? 'bg-blue-100 text-blue-700' :
+                      getMarketCapTier(pendingStock.marketCap) === 'Mid-Cap' ? 'bg-emerald-100 text-emerald-700' :
+                      'bg-orange-100 text-orange-700'
+                    }`}>
+                      {getMarketCapTier(pendingStock.marketCap) || 'Unknown Cap'}
+                    </span>
+                  )}
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Price per share</p>
+                  <p className="font-bold text-2xl text-gray-900">
+                    {pendingStock.price ? `$${parseFloat(pendingStock.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Quantity Selector */}
+              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-sm font-semibold text-gray-700">Quantity</label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      disabled={quantity <= 1}
+                      className="w-9 h-9 rounded-lg border-2 border-gray-300 flex items-center justify-center text-gray-600 hover:border-purple-400 hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <input
+                      type="number"
+                      min="1"
+                      value={quantity}
+                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-20 text-center font-bold text-xl border-2 border-gray-300 rounded-lg py-2 focus:border-purple-500 focus:outline-none"
+                    />
+                    <button
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="w-9 h-9 rounded-lg border-2 border-gray-300 flex items-center justify-center text-gray-600 hover:border-purple-400 hover:bg-purple-50 transition-all"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Quick Amount Buttons */}
+                <div className="flex gap-2 mb-3">
+                  {[1, 5, 10, 25, 50].map((amt) => (
+                    <button
+                      key={amt}
+                      onClick={() => setQuantity(amt)}
+                      className={`flex-1 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        quantity === amt
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-purple-100 hover:text-purple-700'
+                      }`}
+                    >
+                      {amt}
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Price Calculator */}
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-3 border border-purple-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-purple-600 font-medium uppercase tracking-wide">Total Cost</p>
+                      <p className="text-sm text-purple-700">
+                        {quantity} × ${pendingStock.price ? parseFloat(pendingStock.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-2xl text-purple-700">
+                        ${pendingStock.price 
+                          ? (parseFloat(pendingStock.price) * quantity).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                          : '0.00'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -929,30 +1024,44 @@ export function MarketNew() {
                   setShowFantasyModal(false);
                   setPendingStock(null);
                   setSelectedSlot(null);
+                  setQuantity(1);
                 }}
                 disabled={addingToFantasy}
                 className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-colors"
               >
                 Cancel
               </button>
-              <button
-                onClick={handleAddToFantasyPortfolio}
-                disabled={!selectedSlot || addingToFantasy}
-                className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-                  selectedSlot && !addingToFantasy
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                {addingToFantasy ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Adding...
-                  </>
-                ) : (
-                  'Add to Portfolio'
-                )}
-              </button>
+              {(() => {
+                const selectedLeague = userLeagues.find(l => l.league_id === selectedLeagueId);
+                const currentCash = selectedLeague?.current_cash ?? 0;
+                const stockPrice = pendingStock.price ? parseFloat(pendingStock.price) : 0;
+                const totalCost = stockPrice * quantity;
+                const canAfford = currentCash >= totalCost;
+                const isDisabled = !selectedSlot || addingToFantasy || !canAfford;
+                
+                return (
+                  <button
+                    onClick={handleAddToFantasyPortfolio}
+                    disabled={isDisabled}
+                    className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
+                      !isDisabled
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    {addingToFantasy ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        Adding...
+                      </>
+                    ) : !canAfford ? (
+                      'Insufficient Funds'
+                    ) : (
+                      `Add to Portfolio — $${totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    )}
+                  </button>
+                );
+              })()}
             </div>
           </div>
         </div>
