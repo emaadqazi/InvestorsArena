@@ -1,7 +1,3 @@
-// ============================================
-// LEAGUE SERVICE - SUPABASE DATABASE OPERATIONS
-// ============================================
-
 import { supabase } from './supabase';
 import {
   LeagueWithStats,

@@ -16,6 +16,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getUserLeagues, getAvailableSlots, addStockToPortfolio } from '../services/fantasyService';
 import { supabase } from '../services/supabase';
 import { showSuccessToast, showErrorToast, showLoadingToast, dismissToast } from '../utils/toastUtils';
+import { getMarketCapTierString, getMarketCapTier, formatMarketCap } from '../utils/marketCapUtils';
 import type { UserLeagueMember, SlotWithUsage } from '../types/fantasy.types';
 
 interface SelectedStock {
@@ -27,17 +28,6 @@ interface SelectedStock {
   marketCap?: string;
   peRatio?: string;
   loading: boolean;
-}
-
-// Helper to determine market cap tier from market cap value
-function getMarketCapTier(marketCap: string | undefined): 'Large-Cap' | 'Mid-Cap' | 'Small-Cap' | null {
-  if (!marketCap) return null;
-  const value = parseFloat(marketCap);
-  if (isNaN(value)) return null;
-  
-  if (value >= 10_000_000_000) return 'Large-Cap';
-  if (value >= 2_000_000_000) return 'Mid-Cap';
-  return 'Small-Cap';
 }
 
 export function MarketNew() {
@@ -193,11 +183,21 @@ export function MarketNew() {
   const handleAddToPortfolio = (symbol: string, name: string, price?: string, marketCap?: string) => {
     // Find the stock data from searched stocks (fallback if price not provided)
     const stockData = searchedStocks.find(s => s.symbol === symbol);
+    const finalMarketCap = marketCap || stockData?.marketCap;
+    
+    // If market cap is missing and this is from a market mover, try to fetch fresh data
+    if (!finalMarketCap && !stockData) {
+      console.log(`🔄 Missing market cap for ${symbol}, fetching fresh data...`);
+      handleSelectFromSearch(symbol, name);
+      showErrorToast(`Fetching market cap data for ${symbol}. Please try adding to portfolio again in a moment.`);
+      return;
+    }
+    
     setPendingStock({ 
       symbol, 
       name, 
       price: price || stockData?.price,
-      marketCap: marketCap || stockData?.marketCap 
+      marketCap: finalMarketCap
     });
     
     // Show Fantasy modal if user is logged in and has leagues
@@ -223,36 +223,63 @@ export function MarketNew() {
     try {
       // Step 1: Ensure stock exists in database (upsert)
       const stockPrice = pendingStock.price ? parseFloat(pendingStock.price) : 0;
-      const marketCapTier = getMarketCapTier(pendingStock.marketCap);
+      const marketCapTier = getMarketCapTierString(pendingStock.marketCap);
 
-      console.log('Step 1: Checking if stock exists...', { symbol: pendingStock.symbol, marketCapTier });
+      console.log('🔍 Step 1: Stock classification details:', { 
+        symbol: pendingStock.symbol, 
+        rawMarketCap: pendingStock.marketCap,
+        classifiedTier: marketCapTier,
+        selectedSlotConstraint: selectedSlot.constraint_value,
+        slotType: selectedSlot.constraint_type,
+        formattedMarketCap: formatMarketCap(pendingStock.marketCap)
+      });
+
+      // Validate market cap classification before proceeding
+      if (selectedSlot.constraint_type === 'market_cap') {
+        if (!marketCapTier) {
+          // Special handling for missing market cap data
+          const errorMsg = pendingStock.marketCap === undefined || pendingStock.marketCap === null
+            ? `No market cap data available for ${pendingStock.symbol}. This may be a newly listed stock, penny stock, or the data may not be available from our provider. Please try again later or add to a Wildcard slot.`
+            : `Unable to classify market cap for ${pendingStock.symbol}. Market cap data: ${pendingStock.marketCap}. Please try searching for the stock again to get updated data.`;
+          throw new Error(errorMsg);
+        }
+
+        if (marketCapTier !== selectedSlot.constraint_value) {
+          throw new Error(`Stock ${pendingStock.symbol} (${marketCapTier}) does not match slot requirement: ${selectedSlot.constraint_value}. Please select a ${marketCapTier} slot or add to a Wildcard slot.`);
+        }
+      }
 
       let stockId: string;
 
       // Try finding by ticker using maybeSingle() to avoid errors when not found
       const { data: existingStock, error: searchError } = await supabase
         .from('stocks')
-        .select('id, market_cap_tier')
+        .select('id, market_cap_tier, ticker, symbol, name')
         .eq('ticker', pendingStock.symbol)
         .maybeSingle();
 
       if (searchError) {
-        console.error('Stock search error:', searchError);
+        console.error('❌ Stock search error:', searchError);
         throw searchError;
       }
 
-      console.log('Stock lookup result:', { existingStock });
+      console.log('📊 Stock lookup result:', { existingStock });
 
       if (existingStock) {
         // Stock exists - update it with latest info
         stockId = existingStock.id;
-        console.log('Stock found, updating...', { stockId, stockPrice, marketCapTier });
+        console.log('✅ Stock found, updating...', { 
+          stockId, 
+          oldTier: existingStock.market_cap_tier, 
+          newTier: marketCapTier,
+          stockPrice 
+        });
         
         const { error: updateError } = await supabase
           .from('stocks')
           .update({ 
             current_price: stockPrice,
-            market_cap_tier: marketCapTier || existingStock.market_cap_tier,
+            market_cap_tier: marketCapTier,
             symbol: pendingStock.symbol,
             name: pendingStock.name,
             updated_at: new Date().toISOString()
@@ -260,12 +287,17 @@ export function MarketNew() {
           .eq('id', stockId);
 
         if (updateError) {
-          console.error('Stock update error:', updateError);
-          // Continue anyway - the stock exists
+          console.error('❌ Stock update error:', updateError);
+          // Continue anyway - the stock exists, update isn't critical
+        } else {
+          console.log('✅ Stock updated successfully');
         }
       } else {
         // Stock doesn't exist - insert it
-        console.log('Stock not found, creating...', { ticker: pendingStock.symbol, marketCapTier });
+        console.log('➕ Stock not found, creating...', { 
+          ticker: pendingStock.symbol, 
+          marketCapTier 
+        });
         
         const { data: newStock, error: insertError } = await supabase
           .from('stocks')
@@ -280,18 +312,22 @@ export function MarketNew() {
           .single();
 
         if (insertError) {
-          console.error('Stock insert error:', insertError);
+          console.error('❌ Stock insert error:', insertError);
           throw insertError;
         }
         stockId = newStock.id;
-        console.log('Stock created with ID:', stockId);
+        console.log('✅ Stock created with ID:', stockId);
       }
 
       // Step 2: Add to portfolio
-      console.log('Step 2: Adding to portfolio...', {
+      console.log('📈 Step 2: Adding to portfolio...', {
         league_id: selectedLeagueId,
         stock_id: stockId,
         slot_name: selectedSlot.slot_name,
+        constraint_type: selectedSlot.constraint_type,
+        constraint_value: selectedSlot.constraint_value,
+        stock_tier: marketCapTier,
+        quantity: quantity
       });
 
       const { data, error } = await addStockToPortfolio(user.uid, {
@@ -302,17 +338,18 @@ export function MarketNew() {
         quantity: quantity,
       });
 
-      console.log('addStockToPortfolio result:', { data, error });
+      console.log('📊 addStockToPortfolio result:', { data, error });
 
       dismissToast(loadingToast);
 
       if (error) {
-        console.error('Portfolio error:', error);
+        console.error('❌ Portfolio error:', error);
         showErrorToast(error.message || 'Failed to add stock to portfolio');
       } else if (!data?.success) {
-        console.error('Portfolio failed:', data);
+        console.error('❌ Portfolio failed:', data);
         showErrorToast(data?.message || 'Failed to add stock to portfolio');
       } else {
+        console.log('✅ Stock successfully added to portfolio');
         showSuccessToast(`${quantity} share${quantity > 1 ? 's' : ''} of ${pendingStock.symbol} added to ${selectedSlot.slot_name}!`);
         // Refresh slots and league data (to update cash balance)
         fetchLeagueSlots(selectedLeagueId);
@@ -788,15 +825,53 @@ export function MarketNew() {
                 <div>
                   <p className="font-bold text-xl text-gray-900">{pendingStock.symbol}</p>
                   <p className="text-sm text-gray-600">{pendingStock.name}</p>
-                  {pendingStock.marketCap && (
-                    <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
-                      getMarketCapTier(pendingStock.marketCap) === 'Large-Cap' ? 'bg-blue-100 text-blue-700' :
-                      getMarketCapTier(pendingStock.marketCap) === 'Mid-Cap' ? 'bg-emerald-100 text-emerald-700' :
-                      'bg-orange-100 text-orange-700'
-                    }`}>
-                      {getMarketCapTier(pendingStock.marketCap) || 'Unknown Cap'}
-                    </span>
-                  )}
+                  
+                  {/* Market Cap Classification with Debug Info */}
+                  {pendingStock.marketCap && (() => {
+                    const tierInfo = getMarketCapTier(pendingStock.marketCap);
+                    return (
+                      <div className="mt-2 space-y-1">
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          tierInfo ? `${tierInfo.bg} ${tierInfo.color}` : 'bg-red-100 text-red-700'
+                        }`}>
+                          {tierInfo ? tierInfo.tier : 'Unknown Cap'}
+                        </span>
+                        
+                        {/* Debug Info */}
+                        <div className="text-xs text-gray-500">
+                          <span>Raw: {pendingStock.marketCap}</span>
+                          <span className="ml-2">Formatted: {formatMarketCap(pendingStock.marketCap)}</span>
+                          {selectedSlot && selectedSlot.constraint_type === 'market_cap' && (
+                            <span className="ml-2">
+                              Required: 
+                              <span className={`ml-1 font-semibold ${
+                                tierInfo?.tier === selectedSlot.constraint_value 
+                                  ? 'text-emerald-600' 
+                                  : 'text-red-600'
+                              }`}>
+                                {selectedSlot.constraint_value}
+                              </span>
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Validation Warning */}
+                        {selectedSlot && selectedSlot.constraint_type === 'market_cap' && (
+                          tierInfo?.tier !== selectedSlot.constraint_value ? (
+                            <div className="flex items-center gap-1 text-xs text-red-600">
+                              <span>⚠️</span>
+                              <span>This stock doesn't match the slot requirement</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1 text-xs text-emerald-600">
+                              <span>✅</span>
+                              <span>Stock matches slot requirement</span>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-gray-500 uppercase tracking-wide">Price per share</p>
@@ -994,6 +1069,11 @@ export function MarketNew() {
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-xs font-bold text-purple-700 uppercase tracking-wide">🎯 Wildcard</span>
                           <div className="flex-1 h-px bg-purple-200"></div>
+                          {!pendingStock?.marketCap && (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
+                              ✓ Accepts any stock
+                            </span>
+                          )}
                         </div>
                         <div className="grid grid-cols-1 gap-2">
                           {leagueSlots.filter(s => s.constraint_type === 'wildcard' && !s.is_full).map((slot) => (
@@ -1007,6 +1087,9 @@ export function MarketNew() {
                               }`}
                             >
                               <div className="font-semibold text-sm">{slot.slot_name} — Pick any stock!</div>
+                              {!pendingStock?.marketCap && (
+                                <div className="text-xs opacity-75 mt-1">No market cap data required</div>
+                              )}
                             </button>
                           ))}
                         </div>

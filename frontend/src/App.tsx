@@ -16,6 +16,7 @@ import { ChallengesNew } from "./pages/ChallengesNew";
 import { MarketNew } from "./pages/MarketNew";
 import { BlogNew } from "./pages/BlogNew";
 import { NewsNew } from "./pages/NewsNew";
+import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/market" element={<MarketNew />} />
           <Route path="/blog" element={<BlogNew />} />
           <Route path="/news" element={<NewsNew />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
         </Routes>
       </HashRouter>
       {/* Toast Notifications */}

@@ -2,17 +2,7 @@ import { Card } from '../ui/card';
 import { Heart, Plus, TrendingUp, TrendingDown } from 'lucide-react';
 import { Button } from '../ui/button';
 import { MarketMover } from '../../services/alphaVantage';
-
-// Helper to determine market cap tier from volume heuristic
-// Since market movers don't have market cap, we'll estimate based on volume
-function estimateCapTier(volume: string): { tier: string; color: string; bg: string } {
-  const vol = parseInt(volume);
-  
-  // Use volume as a rough heuristic (high volume stocks tend to be larger)
-  if (vol >= 50_000_000) return { tier: 'Large-Cap', color: 'text-blue-700', bg: 'bg-blue-100' };
-  if (vol >= 10_000_000) return { tier: 'Mid-Cap', color: 'text-emerald-700', bg: 'bg-emerald-100' };
-  return { tier: 'Small-Cap', color: 'text-orange-700', bg: 'bg-orange-100' };
-}
+import { estimateCapTierFromVolume } from '../../utils/marketCapUtils';
 
 interface MarketMoverCardProps {
   mover: MarketMover;
@@ -34,7 +24,7 @@ export function MarketMoverCard({
   const changePercent = parseFloat(mover.change_percentage.replace('%', ''));
   const isPositive = changePercent >= 0;
   const changeColor = isPositive ? 'text-emerald-600' : 'text-red-600';
-  const capTier = estimateCapTier(mover.volume);
+  const capTier = estimateCapTierFromVolume(mover.volume);
 
   return (
     <Card className="p-6 border-2 border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all group relative">

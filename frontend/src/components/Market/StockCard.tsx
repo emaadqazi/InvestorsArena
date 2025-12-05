@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card } from '../ui/card';
 import { Heart, Plus, TrendingUp, TrendingDown, Info } from 'lucide-react';
 import { Button } from '../ui/button';
+import { getMarketCapTier, formatMarketCap } from '../../utils/marketCapUtils';
 
 interface StockCardProps {
   symbol: string;
@@ -17,17 +18,6 @@ interface StockCardProps {
   onAddToPortfolio?: () => void;
   onViewDetails?: () => void;
   loading?: boolean;
-}
-
-// Helper to determine market cap tier
-function getMarketCapTier(marketCap: string | undefined): { tier: string; color: string; bg: string } | null {
-  if (!marketCap) return null;
-  const value = parseFloat(marketCap);
-  if (isNaN(value)) return null;
-  
-  if (value >= 10_000_000_000) return { tier: 'Large-Cap', color: 'text-blue-700', bg: 'bg-blue-100' };
-  if (value >= 2_000_000_000) return { tier: 'Mid-Cap', color: 'text-emerald-700', bg: 'bg-emerald-100' };
-  return { tier: 'Small-Cap', color: 'text-orange-700', bg: 'bg-orange-100' };
 }
 
 export function StockCard({
@@ -50,15 +40,6 @@ export function StockCard({
   const isPositive = change && parseFloat(change) >= 0;
   const changeColor = isPositive ? 'text-emerald-600' : 'text-red-600';
   const capTier = getMarketCapTier(marketCap);
-
-  const formatMarketCap = (cap?: string) => {
-    if (!cap) return 'N/A';
-    const value = parseFloat(cap);
-    if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
-    if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
-    if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
-    return `$${value.toFixed(2)}`;
-  };
 
   if (loading) {
     return (

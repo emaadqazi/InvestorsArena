@@ -21,6 +21,7 @@ const fantasyNavItems: NavItem[] = [
   { label: "Fantasy", path: "/fantasy" },
   { label: "League", path: "/league" },
   { label: "Market", path: "/market" },
+  { label: "Ethics", path: "/privacy" },
 ];
 
 export function UnifiedNav({ variant }: UnifiedNavProps) {
