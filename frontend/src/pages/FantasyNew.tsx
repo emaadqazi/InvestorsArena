@@ -18,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { getUserLeagues, getAvailableSlots, getPortfolioHoldings, getLeagueMemberInfo, removeStockFromPortfolio } from "../services/fantasyService";
+import { getUserLeagues, getAvailableSlots, getPortfolioHoldings, getLeagueMemberInfo, removeStockFromPortfolio, seedLeagueSlots } from "../services/fantasyService";
 import { AddStockModal } from "../components/Fantasy/AddStockModal";
 import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
 import { getMarketStatus, MarketStatus } from "../utils/marketHours";
@@ -100,7 +100,20 @@ export function FantasyNew() {
         getLeagueMemberInfo(user.uid, selectedLeague.league_id),
       ]);
 
-      if (slotsResult.error) {
+      // If no slots exist, seed them automatically
+      if (!slotsResult.error && (!slotsResult.data || slotsResult.data.length === 0)) {
+        console.log("No slots found, seeding defaults for league:", selectedLeague.league_id);
+        const seedResult = await seedLeagueSlots(selectedLeague.league_id);
+        if (seedResult.success) {
+          // Re-fetch slots after seeding
+          const newSlotsResult = await getAvailableSlots(user.uid, selectedLeague.league_id);
+          if (!newSlotsResult.error) {
+            setSlots(newSlotsResult.data || []);
+          }
+        } else {
+          console.error("Failed to seed slots:", seedResult.error);
+        }
+      } else if (slotsResult.error) {
         console.error("Error loading slots:", slotsResult.error);
       } else {
         setSlots(slotsResult.data || []);

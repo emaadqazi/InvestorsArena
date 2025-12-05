@@ -20,7 +20,6 @@ const homeNavItems: NavItem[] = [];
 const fantasyNavItems: NavItem[] = [
   { label: "Fantasy", path: "/fantasy" },
   { label: "League", path: "/league" },
-  { label: "Challenges", path: "/challenges" },
   { label: "Market", path: "/market" },
 ];
 
@@ -28,7 +27,7 @@ export function UnifiedNav({ variant }: UnifiedNavProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const navItems = variant === "home" ? homeNavItems : fantasyNavItems;
-  const { user, isAuthenticated, signOut, getUserDisplayName, getUserInitials, getUserPhotoURL } = useAuth() as AuthContextType;
+  const { user, isAuthenticated, signOut, getUserDisplayName, getUserPhotoURL } = useAuth() as AuthContextType;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -107,17 +106,19 @@ export function UnifiedNav({ variant }: UnifiedNavProps) {
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-100 transition-all"
               >
-                {getUserPhotoURL() ? (
-                  <img
-                    src={getUserPhotoURL() || ''}
-                    alt="Profile"
-                    className="h-8 w-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-400 flex items-center justify-center text-white font-semibold text-sm">
-                    {getUserInitials()}
-                  </div>
-                )}
+                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-400 flex items-center justify-center shadow-md ring-2 ring-emerald-500/20 overflow-hidden">
+                  {getUserPhotoURL() ? (
+                    <img
+                      src={getUserPhotoURL() || ''}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                  )}
+                </div>
                 <span className="hidden sm:inline text-gray-700 font-medium">
                   {getUserDisplayName()}
                 </span>
@@ -125,28 +126,45 @@ export function UnifiedNav({ variant }: UnifiedNavProps) {
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-                  <div className="px-4 py-3 border-b border-gray-100">
-                    <p className="text-sm font-semibold text-gray-900">{getUserDisplayName()}</p>
-                    <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50">
+                  <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-400 flex items-center justify-center shadow-md ring-2 ring-emerald-500/20 overflow-hidden">
+                      {getUserPhotoURL() ? (
+                        <img
+                          src={getUserPhotoURL() || ''}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{getUserDisplayName()}</p>
+                      <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                    </div>
                   </div>
 
-                  <button
-                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-gray-50 transition-colors text-gray-400 cursor-not-allowed"
-                    disabled
-                  >
-                    <Settings className="h-4 w-4" />
-                    <span className="text-sm">Profile Settings</span>
-                    <span className="ml-auto text-xs bg-gray-100 px-2 py-0.5 rounded-full">Soon</span>
-                  </button>
+                  <div className="py-1">
+                    <button
+                      className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-gray-50 transition-colors text-gray-400 cursor-not-allowed"
+                      disabled
+                    >
+                      <Settings className="h-4 w-4" />
+                      <span className="text-sm">Profile Settings</span>
+                      <span className="ml-auto text-xs bg-gray-100 px-2 py-0.5 rounded-full">Soon</span>
+                    </button>
 
-                  <button
-                    onClick={handleLogout}
-                    className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-red-50 transition-colors text-red-600"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span className="text-sm font-medium">Logout</span>
-                  </button>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-red-50 transition-colors text-red-600"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span className="text-sm font-medium">Logout</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

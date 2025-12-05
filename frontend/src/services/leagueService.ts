@@ -101,6 +101,18 @@ export async function createLeague(
 
     console.log('✅ League created successfully:', data.league_id);
 
+    // Seed default slots for the new league
+    const { error: slotsError } = await supabase.rpc('add_default_slots_to_league', {
+      p_league_id: data.league_id
+    });
+
+    if (slotsError) {
+      console.error('Error seeding league slots:', slotsError);
+      // Don't fail the whole operation, slots can be added later
+    } else {
+      console.log('✅ Default slots seeded for league:', data.league_id);
+    }
+
     // Return the created league data
     const { data: leagueData, error: fetchError } = await supabase
       .from('league_stats')

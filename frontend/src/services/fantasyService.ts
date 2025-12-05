@@ -60,6 +60,25 @@ export async function getUserLeagues(firebaseUid: string) {
 }
 
 /**
+ * Seed default slots for a league (if none exist)
+ */
+export async function seedLeagueSlots(leagueId: string): Promise<{ success: boolean; error: any }> {
+  try {
+    const { error } = await supabase.rpc("add_default_slots_to_league", {
+      p_league_id: leagueId,
+    });
+
+    if (error) throw error;
+
+    console.log("✅ Default slots seeded for league:", leagueId);
+    return { success: true, error: null };
+  } catch (err: any) {
+    console.error("Error seeding league slots:", err);
+    return { success: false, error: err };
+  }
+}
+
+/**
  * Get available slots for a league with usage information
  */
 export async function getAvailableSlots(
