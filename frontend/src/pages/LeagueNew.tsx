@@ -34,6 +34,7 @@ import {
   joinLeague,
   joinLeagueByCode,
   leaveLeague,
+  deleteLeague,
   getLeagueMembers,
 } from "../services/leagueService";
 import { sortLeagues, filterLeagues } from "../utils/leagueUtils";
@@ -288,6 +289,41 @@ export function LeagueNew() {
       console.log("✅ Successfully left league");
     } catch (err: any) {
       console.error("Error leaving league:", err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDisbandLeague = async (leagueId: string) => {
+    if (!user) return;
+    // eslint-disable-next-line no-restricted-globals
+    if (!confirm("Are you sure you want to DISBAND this league? This action cannot be undone and will remove all members and data.")) return;
+
+    const loadingToast = showLoadingToast('Disbanding league...');
+    setActionLoading(true);
+
+    try {
+      const { error: err } = await deleteLeague(user.uid, leagueId);
+
+      dismissToast(loadingToast);
+
+      if (err) {
+        showErrorToast(err.message || "Failed to disband league");
+        throw err;
+      }
+
+      // Refresh leagues
+      await loadMyLeagues();
+      await loadPublicLeagues();
+
+      // Close details modal
+      setShowDetailsModal(false);
+      setSelectedLeague(null);
+
+      showSuccessToast("League disbanded successfully");
+      console.log("✅ Successfully disbanded league");
+    } catch (err: any) {
+      console.error("Error disbanding league:", err);
     } finally {
       setActionLoading(false);
     }
@@ -609,6 +645,7 @@ export function LeagueNew() {
         members={leagueMembers}
         onJoin={selectedLeague && !selectedLeague.is_member ? () => handleJoinLeague(selectedLeague.id) : undefined}
         onLeave={selectedLeague && selectedLeague.is_member && !selectedLeague.is_creator ? () => handleLeaveLeague(selectedLeague.id) : undefined}
+        onDisband={selectedLeague && selectedLeague.is_creator ? () => handleDisbandLeague(selectedLeague.id) : undefined}
         isLoading={actionLoading}
         loadingMembers={loadingMembers}
       />

@@ -23,6 +23,7 @@ import {
   Loader2,
   Share2,
   LogOut,
+  Trash2,
 } from "lucide-react";
 import {
   LeagueWithStats,
@@ -48,6 +49,7 @@ interface LeagueDetailsModalProps {
   members: LeagueMemberWithUser[];
   onJoin?: () => void;
   onLeave?: () => void;
+  onDisband?: () => void;
   isLoading?: boolean;
   loadingMembers?: boolean;
 }
@@ -59,6 +61,7 @@ export function LeagueDetailsModal({
   members,
   onJoin,
   onLeave,
+  onDisband,
   isLoading,
   loadingMembers,
 }: LeagueDetailsModalProps) {
@@ -440,6 +443,27 @@ export function LeagueDetailsModal({
                     <>
                       <LogOut className="h-5 w-5 mr-2" />
                       Leave League
+                    </>
+                  )}
+                </Button>
+              )}
+              {league.is_creator && onDisband && (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="flex-1 border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 font-medium transition-colors h-12"
+                  onClick={onDisband}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      Disbanding...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-5 w-5 mr-2" />
+                      Disband League
                     </>
                   )}
                 </Button>
