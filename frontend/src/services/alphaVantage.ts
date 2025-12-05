@@ -1,7 +1,18 @@
 // Alpha Vantage API Service with Smart Caching
+import { isMarketOpen } from '../utils/marketHours';
+
 const API_KEY = process.env.REACT_APP_ALPHAVANTAGE_API_KEY;
 const BASE_URL = 'https://www.alphavantage.co/query';
-const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
+
+// Dynamic cache duration based on market hours
+const getDynamicCacheDuration = (): number => {
+  if (isMarketOpen()) {
+    return 15 * 60 * 1000; // 15 minutes during market hours
+  } else {
+    return 60 * 60 * 1000; // 1 hour after market hours
+  }
+};
+
 const MAX_DAILY_CALLS = 25;
 
 interface CacheEntry<T> {
@@ -68,9 +79,10 @@ class CacheManager {
 
       const entry: CacheEntry<T> = JSON.parse(cached);
       const now = Date.now();
+      const cacheDuration = getDynamicCacheDuration();
 
       // Check if cache is expired
-      if (now - entry.timestamp > CACHE_DURATION) {
+      if (now - entry.timestamp > cacheDuration) {
         localStorage.removeItem(`av_cache_${key}`);
         return null;
       }

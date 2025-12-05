@@ -185,12 +185,11 @@ export function MarketNew() {
     const stockData = searchedStocks.find(s => s.symbol === symbol);
     const finalMarketCap = marketCap || stockData?.marketCap;
     
-    // If market cap is missing and this is from a market mover, try to fetch fresh data
+    // If market cap is missing and this is from a market mover, fetch fresh data but still show modal
     if (!finalMarketCap && !stockData) {
-      console.log(`🔄 Missing market cap for ${symbol}, fetching fresh data...`);
+      console.log(`🔄 Missing market cap for ${symbol}, fetching fresh data while opening modal...`);
       handleSelectFromSearch(symbol, name);
-      showErrorToast(`Fetching market cap data for ${symbol}. Please try adding to portfolio again in a moment.`);
-      return;
+      showLoadingToast(`Fetching market cap data for ${symbol}...`);
     }
     
     setPendingStock({ 
@@ -592,7 +591,7 @@ export function MarketNew() {
                   isInWatchlist={isInWatchlist(mover.ticker)}
                   isInPortfolio={isInPortfolio(mover.ticker)}
                   onToggleWatchlist={() => toggleWatchlist(mover.ticker, mover.ticker)}
-                  onAddToPortfolio={() => handleAddToPortfolio(mover.ticker, mover.ticker, mover.price)}
+                  onAddToPortfolio={(symbol, name, price, marketCap) => handleAddToPortfolio(symbol, name, price, marketCap)}
                   onViewDetails={() => setSelectedSymbol(mover.ticker)}
                 />
               ))}
@@ -617,7 +616,7 @@ export function MarketNew() {
                   isInWatchlist={isInWatchlist(mover.ticker)}
                   isInPortfolio={isInPortfolio(mover.ticker)}
                   onToggleWatchlist={() => toggleWatchlist(mover.ticker, mover.ticker)}
-                  onAddToPortfolio={() => handleAddToPortfolio(mover.ticker, mover.ticker, mover.price)}
+                  onAddToPortfolio={(symbol, name, price, marketCap) => handleAddToPortfolio(symbol, name, price, marketCap)}
                   onViewDetails={() => setSelectedSymbol(mover.ticker)}
                 />
               ))}

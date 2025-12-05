@@ -2,14 +2,16 @@ import { Card } from '../ui/card';
 import { Heart, Plus, TrendingUp, TrendingDown } from 'lucide-react';
 import { Button } from '../ui/button';
 import { MarketMover } from '../../services/alphaVantage';
-import { estimateCapTierFromVolume } from '../../utils/marketCapUtils';
+import { getMarketCapTier } from '../../utils/marketCapUtils';
+import { useEffect, useState } from 'react';
+import { getCompanyOverview } from '../../services/alphaVantage';
 
 interface MarketMoverCardProps {
   mover: MarketMover;
   isInWatchlist?: boolean;
   isInPortfolio?: boolean;
   onToggleWatchlist?: () => void;
-  onAddToPortfolio?: () => void;
+  onAddToPortfolio?: (symbol: string, name: string, price?: string, marketCap?: string) => void;
   onViewDetails?: () => void;
 }
 
@@ -21,16 +23,44 @@ export function MarketMoverCard({
   onAddToPortfolio,
   onViewDetails,
 }: MarketMoverCardProps) {
+  const [marketCap, setMarketCap] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState(false);
+  
   const changePercent = parseFloat(mover.change_percentage.replace('%', ''));
   const isPositive = changePercent >= 0;
   const changeColor = isPositive ? 'text-emerald-600' : 'text-red-600';
-  const capTier = estimateCapTierFromVolume(mover.volume);
+  
+  // Get market cap tier from real data or fallback to volume estimate
+  const capTier = getMarketCapTier(marketCap) || {
+    tier: 'Unknown',
+    color: 'text-gray-600',
+    bg: 'bg-gray-100'
+  };
+
+  // Fetch real market cap data on component mount
+  useEffect(() => {
+    const fetchMarketCap = async () => {
+      setLoading(true);
+      try {
+        const overview = await getCompanyOverview(mover.ticker);
+        if (overview?.MarketCapitalization) {
+          setMarketCap(overview.MarketCapitalization);
+        }
+      } catch (error) {
+        console.error(`Error fetching market cap for ${mover.ticker}:`, error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMarketCap();
+  }, [mover.ticker]);
 
   return (
     <Card className="p-6 border-2 border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all group relative">
       {/* Market Cap Tier Badge */}
       <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-semibold ${capTier.bg} ${capTier.color}`}>
-        {capTier.tier}
+        {loading ? 'Loading...' : capTier.tier}
       </div>
       
       <div className="flex flex-col h-full">
@@ -103,7 +133,7 @@ export function MarketMoverCard({
                   ? 'bg-gray-400 hover:bg-gray-500'
                   : 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600'
               }`}
-              onClick={onAddToPortfolio}
+              onClick={() => onAddToPortfolio(mover.ticker, mover.ticker, mover.price, marketCap)}
               disabled={isInPortfolio}
             >
               <Plus className="h-4 w-4 mr-1" />
