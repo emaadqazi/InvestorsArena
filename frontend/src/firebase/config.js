@@ -1,20 +1,48 @@
-// Firebase Configuration
+// Firebase configuration with fallback for development
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID
-};
+let app = null;
+let auth = null;
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Check if we have proper Firebase configuration
+const isDemoConfig = !process.env.REACT_APP_FIREBASE_API_KEY || 
+                     process.env.REACT_APP_FIREBASE_API_KEY === "your_api_key_here" ||
+                     process.env.REACT_APP_FIREBASE_API_KEY === "demo-api-key";
 
-// Initialize Firebase Authentication
-export const auth = getAuth(app);
+if (!isDemoConfig) {
+  // Only initialize Firebase if we have proper configuration
+  try {
+    const firebaseConfig = {
+      apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+      authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+      projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+      storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+      appId: process.env.REACT_APP_FIREBASE_APP_ID
+    };
+    
+    // Check if all required config values are present
+    const hasAllConfig = firebaseConfig.apiKey && 
+                        firebaseConfig.authDomain && 
+                        firebaseConfig.projectId && 
+                        firebaseConfig.appId;
+    
+    if (hasAllConfig) {
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      console.log('✅ Firebase initialized successfully');
+    } else {
+      console.warn('⚠️ Firebase configuration is incomplete. Please check your .env file.');
+    }
+  } catch (error) {
+    console.error('⚠️ Firebase initialization failed:', error.message);
+    console.error('Error details:', error);
+  }
+} else {
+  console.warn('⚠️ Using demo mode. Please set up your Firebase project and update the .env file for authentication to work.');
+}
 
+// Export with fallbacks
+export { auth };
 export default app;
